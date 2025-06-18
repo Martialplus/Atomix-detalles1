@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalles de Película</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+    }
+    .contenedor {
+      max-width: 800px;
+      margin: auto;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-top: 0.5em;
+    }
+    p {
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <img id="imagen" src="" alt="Imagen de la película" />
+    <h1 id="titulo">Cargando título…</h1>
+    <p><strong>Año:</strong> <span id="anio">Cargando…</span></p>
+    <p>Aquí puedes incluir descripción, trailer, reparto, etc.</p>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const titulo = urlParams.get('titulo');
+
+    // Puedes extender esta lista con más películas
+    const peliculas = [
+      {
+        titulo: 'Spiderman: De regreso a casa',
+        imagen: 'https://image.tmdb.org/t/p/original/81qIJbnS2L0rUAAB55G8CZODpS5.jpg',
+        anio: '2025'
+      },
+      {
+        titulo: 'La leyenda de Ochi',
+        imagen: 'https://image.tmdb.org/t/p/original/h1Iq6WfE4RWc9klGvN8sdi5aR6V.jpg',
+        anio: '2025'
+      },
+      {
+        titulo: 'Fuente de la Juventud',
+        imagen: 'https://image.tmdb.org/t/p/original/1QZeQEGEWWxQWJFg3r1ouhjRNQB.jpg',
+        anio: '2024'
+      },
+      {
+        titulo: 'Doble Espionaje',
+        imagen: 'https://upload.wikimedia.org/wikipedia/en/7/74/Tinker_Tailor_Soldier_Spy_poster.jpg',
+        anio: '2023'
+      },
+      {
+        titulo: 'Baila, Vini (2025)',
+        imagen: 'https://m.media-amazon.com/images/I/71wF6Wexs+L._AC_UF894,1000_QL80_.jpg',
+        anio: '2025'
+      }
+    ];
+
+    const pelicula = peliculas.find(p => p.titulo === titulo);
+
+    if (pelicula) {
+      document.getElementById('titulo').textContent = pelicula.titulo;
+      document.getElementById('imagen').src = pelicula.imagen;
+      document.getElementById('anio').textContent = pelicula.anio;
+    } else {
+      document.getElementById('titulo').textContent = 'Película no encontrada';
+    }
+  </script>
+</body>
+</html>
