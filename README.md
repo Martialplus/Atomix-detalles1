@@ -1,1 +1,1 @@
-# Atomix-detalles1
+# Página de detalles Atomix
