@@ -93,7 +93,6 @@
   firebase.initializeApp({apiKey:"AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",authDomain:"atomix-54e1a.firebaseapp.com",projectId:"atomix-54e1a"});
   const db=firebase.firestore();
 
-  /* -------- Obtener título -------- */
   const tituloParam=new URLSearchParams(location.search).get('titulo')||'';
   const $hero=document.getElementById('hero');
   const $play=document.getElementById('playBtn');
@@ -106,11 +105,13 @@
 
   let videoURL='';
 
-  if(!tituloParam){$titulo.textContent='Película no encontrada';$play.style.display='none';}
-  else{
+  if(!tituloParam){
+    $titulo.textContent='Película no encontrada';
+    $play.style.display='none';
+  }else{
     db.collection('peliculas').where('titulo','==',decodeURIComponent(tituloParam)).get()
       .then(snap=>{
-        if(snap.empty)throw new Error('No existe');
+        if(snap.empty) throw new Error('No existe');
         const p=snap.docs[0].data();
         $titulo.textContent=p.titulo||'Sin título';
         if(p.anio) $anio.textContent=`Año: ${p.anio}`;
@@ -120,23 +121,40 @@
         videoURL=p.trailer||p.video||'';
         if(!videoURL){$play.style.display='none';}
       })
-      .catch(e=>{$titulo.textContent='Película no encontrada';$play.style.display='none';});
+      .catch(e=>{
+        $titulo.textContent='Película no encontrada';
+        $play.style.display='none';
+      });
   }
 
-  /* -------- Abrir player -------- */
-  $play.addEventListener('click',()=>{
-    if(!videoURL) return;
-    if(/\.mp4$|\.m3u8$/.test(videoURL)){
-      $video.src=videoURL;
-      const plyr=new Plyr($video,{autoplay:true});
-    }else{
-      // YouTube embed
-      $modal.innerHTML=`<button class='modal-close' aria-label='Cerrar' onclick='modal.close()'><svg viewBox='0 0 24 24'><path d='M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z'/></svg></button><iframe src="${videoURL}" frameborder="0" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
-    }
+  /* -------- Abrir player en fullscreen + autoplay -------- */
+  $play.addEventListener('click', async () => {
+    if (!videoURL) return;
+
+    $video.src = videoURL;
+    const plyr = new Plyr($video, { autoplay: true });
+
     $modal.showModal();
+
+    try {
+      await $video.play();
+      // Solicitar pantalla completa
+      if ($video.requestFullscreen) await $video.requestFullscreen();
+      else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
+      else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
+    } catch (e) {
+      console.warn("No se pudo reproducir automáticamente:", e.message);
+    }
   });
 
-  const modal=document.getElementById('modalPlayer');
+  // Cerrar modal y detener video
+  const modal = document.getElementById('modalPlayer');
+  document.querySelector('.modal-close').addEventListener('click', () => {
+    $modal.close();
+    $video.pause();
+    if (document.fullscreenElement) document.exitFullscreen();
+  });
 </script>
+
 </body>
 </html>
