@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Detalles – Atomix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -9,126 +9,134 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+  <!-- Player library (opcional: Plyr) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
+
   <style>
     :root{
       --primario:#00aaff;
-      --gris:#1a1a1a;
+      --gris:#1b1b1b;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,Helvetica,sans-serif;background:#000;color:#fff;}
+    body{font-family:Arial,Helvetica,sans-serif;background:#000;color:#fff;overflow-x:hidden}
 
-    /* ---------- Botón volver ---------- */
-    .btn-back{
-      position:fixed;top:24px;left:24px;z-index:50;
-      width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-      background:rgba(0,0,0,.6);border:none;border-radius:50%;cursor:pointer;
-      backdrop-filter:blur(6px);transition:background .25s,transform .25s;
-    }
-    .btn-back:hover{background:rgba(0,170,255,.8);transform:scale(1.05)}
+    /* Botón volver */
+    .btn-back{position:fixed;top:24px;left:24px;z-index:100;width:48px;height:48px;
+      display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(6px);cursor:pointer;transition:.25s}
+    .btn-back:hover{background:var(--primario);transform:scale(1.05)}
     .btn-back svg{width:24px;height:24px;fill:#fff}
 
-    /* ---------- Hero ---------- */
-    .hero{
-      width:100%;height:60vh;min-height:360px;
-      background:#333 center/cover no-repeat;position:relative;
-    }
-    .hero::after{content:'';position:absolute;inset:0;pointer-events:none;
-      background:linear-gradient(to top,rgba(0,0,0,.9) 5%,rgba(0,0,0,0) 60%)}
+    /* Hero */
+    .hero{width:100%;height:60vh;min-height:360px;background:center/cover #222 no-repeat;position:relative}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 15%,rgba(0,0,0,0) 60%)}
+    /* Botón play encima */
+    .btn-play{position:absolute;inset:0;margin:auto;width:96px;height:96px;border:none;border-radius:50%;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;
+      transition:background .25s,transform .25s;z-index:10}
+    .btn-play svg{width:42px;height:42px;fill:#fff;margin-left:4px}
+    .btn-play:hover{background:var(--primario);transform:scale(1.1)}
 
-    /* ---------- Información ---------- */
-    .info-wrapper{
-      width:100%;padding:32px 5vw;display:flex;flex-direction:column;gap:24px;
-    }
-    .titulo{font-size:3vw;min-font-size:28px;font-weight:700}
-    .meta{display:flex;gap:24px;font-size:1.2vw;min-font-size:14px;color:#aaa}
-    .meta span.rating{background:var(--gris);padding:4px 14px;border-radius:14px;color:var(--primario);font-weight:600}
-    .sinopsis{max-width:80vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
+    /* Info */
+    .info{width:100%;padding:40px 6vw;max-width:1600px;margin:auto;display:flex;flex-direction:column;gap:24px}
+    .titulo{font-size:3.5vw;min-font-size:32px;font-weight:700;line-height:1.2}
+    .meta{display:flex;gap:28px;font-size:1.2vw;min-font-size:15px;color:#aaa}
+    .meta .rating{background:var(--gris);padding:4px 16px;border-radius:14px;color:var(--primario);font-weight:600}
+    .sinopsis{max-width:90vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
 
-    /* ---------- Player ---------- */
-    .player-wrapper{width:100%;padding:0 5vw 40px}
-    iframe,video{width:100%;height:56.25vw;max-height:640px;border:none;border-radius:12px;background:#000}
+    /* Modal Player */
+    dialog#modalPlayer{width:100vw;height:100vh;border:none;padding:0;background:rgba(0,0,0,.92)}
+    dialog::backdrop{background:rgba(0,0,0,.85)}
+    .plyr{height:100%;background:#000}
+    .modal-close{position:absolute;top:20px;right:28px;border:none;background:none;cursor:pointer;z-index:20}
+    .modal-close svg{width:28px;height:28px;fill:#fff;transition:transform .25s}
+    .modal-close:hover svg{transform:rotate(90deg)}
 
     @media(max-width:900px){
       .titulo{font-size:28px}
       .meta{font-size:14px}
       .sinopsis{font-size:15px}
-      iframe,video{height:240px}
     }
   </style>
 </head>
 <body>
+  <button class="btn-back" onclick="history.back()" aria-label="Volver">
+    <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
+  </button>
 
-<!-- Botón Volver -->
-<button class="btn-back" onclick="history.back()" aria-label="Volver">
-  <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
-</button>
+  <section id="hero" class="hero">
+    <button id="playBtn" class="btn-play" aria-label="Reproducir">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+  </section>
 
-<!-- Hero (imagen de fondo) -->
-<section id="hero" class="hero"></section>
+  <section class="info">
+    <h1 id="titulo" class="titulo">Cargando…</h1>
+    <div class="meta">
+      <span id="anio"></span>
+      <span id="puntuacion" class="rating"></span>
+    </div>
+    <p id="sinopsis" class="sinopsis"></p>
+  </section>
 
-<!-- Información -->
-<section class="info-wrapper">
-  <h1 id="titulo" class="titulo">Cargando…</h1>
-  <div class="meta">
-    <span id="anio"></span>
-    <span id="puntuacion" class="rating"></span>
-  </div>
-  <p id="sinopsis" class="sinopsis"></p>
-</section>
-
-<!-- Reproductor -->
-<section class="player-wrapper" id="playerWrap" style="display:none">
-  <iframe id="player" allowfullscreen></iframe>
-</section>
+  <!-- Modal Player -->
+  <dialog id="modalPlayer">
+    <button class="modal-close" aria-label="Cerrar" onclick="modal.close()">
+      <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
+    </button>
+    <video id="player" class="plyr" controls playsinline></video>
+  </dialog>
 
 <script>
-  /* ----- Firebase config ----- */
-  firebase.initializeApp({
-    apiKey:"AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
-    authDomain:"atomix-54e1a.firebaseapp.com",
-    projectId:"atomix-54e1a"
-  });
+  /* -------- Firebase ---------- */
+  firebase.initializeApp({apiKey:"AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",authDomain:"atomix-54e1a.firebaseapp.com",projectId:"atomix-54e1a"});
   const db=firebase.firestore();
 
-  /* ----- Obtener título de la URL ----- */
-  const qs=new URLSearchParams(location.search);
-  const titulo=qs.get('titulo')?decodeURIComponent(qs.get('titulo')):'';
-
+  /* -------- Obtener título -------- */
+  const tituloParam=new URLSearchParams(location.search).get('titulo')||'';
+  const $hero=document.getElementById('hero');
+  const $play=document.getElementById('playBtn');
+  const $modal=document.getElementById('modalPlayer');
+  const $video=document.getElementById('player');
   const $titulo=document.getElementById('titulo');
   const $anio=document.getElementById('anio');
-  const $puntu=document.getElementById('puntuacion');
-  const $sinopsis=document.getElementById('sinopsis');
-  const $hero=document.getElementById('hero');
-  const $player=document.getElementById('player');
-  const $wrap=document.getElementById('playerWrap');
+  const $punt=document.getElementById('puntuacion');
+  const $sin=document.getElementById('sinopsis');
 
-  if(!titulo){
-    $titulo.textContent='Película no encontrada';
-  }else{
-    db.collection('peliculas').where('titulo','==',titulo).get()
+  let videoURL='';
+
+  if(!tituloParam){$titulo.textContent='Película no encontrada';$play.style.display='none';}
+  else{
+    db.collection('peliculas').where('titulo','==',decodeURIComponent(tituloParam)).get()
       .then(snap=>{
-        if(snap.empty) throw new Error('No existe');
+        if(snap.empty)throw new Error('No existe');
         const p=snap.docs[0].data();
         $titulo.textContent=p.titulo||'Sin título';
         if(p.anio) $anio.textContent=`Año: ${p.anio}`;
-        if(p.puntuacion) $puntu.textContent=`⭐ ${p.puntuacion}/10`;
-        $sinopsis.textContent=p.sinopsis||'Sinopsis no disponible.';
+        if(p.puntuacion) $punt.textContent=`⭐ ${p.puntuacion}/10`;
+        $sin.textContent=p.sinopsis||'Sinopsis no disponible.';
         $hero.style.backgroundImage=`url(${p.imagen})`;
-
-        if(p.trailer){
-          if(/youtube\.com|youtu\.be/.test(p.trailer)){
-            $player.src=p.trailer;
-          }else{
-            $wrap.innerHTML=`<video controls src="${p.trailer}"></video>`;
-          }
-          $wrap.style.display='block';
-        }
+        videoURL=p.trailer||p.video||'';
+        if(!videoURL){$play.style.display='none';}
       })
-      .catch(err=>{
-        console.warn(err);
-        $titulo.textContent='Película no encontrada';
-      });
+      .catch(e=>{$titulo.textContent='Película no encontrada';$play.style.display='none';});
   }
+
+  /* -------- Abrir player -------- */
+  $play.addEventListener('click',()=>{
+    if(!videoURL) return;
+    if(/\.mp4$|\.m3u8$/.test(videoURL)){
+      $video.src=videoURL;
+      const plyr=new Plyr($video,{autoplay:true});
+    }else{
+      // YouTube embed
+      $modal.innerHTML=`<button class='modal-close' aria-label='Cerrar' onclick='modal.close()'><svg viewBox='0 0 24 24'><path d='M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z'/></svg></button><iframe src="${videoURL}" frameborder="0" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+    }
+    $modal.showModal();
+  });
+
+  const modal=document.getElementById('modalPlayer');
 </script>
 </body>
 </html>
