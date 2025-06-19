@@ -91,39 +91,39 @@
 <script>
   /* -------- Firebase ---------- */
   firebase.initializeApp({apiKey:"AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",authDomain:"atomix-54e1a.firebaseapp.com",projectId:"atomix-54e1a"});
-  const db=firebase.firestore();
+  const db = firebase.firestore();
 
-  const tituloParam=new URLSearchParams(location.search).get('titulo')||'';
-  const $hero=document.getElementById('hero');
-  const $play=document.getElementById('playBtn');
-  const $modal=document.getElementById('modalPlayer');
-  const $video=document.getElementById('player');
-  const $titulo=document.getElementById('titulo');
-  const $anio=document.getElementById('anio');
-  const $punt=document.getElementById('puntuacion');
-  const $sin=document.getElementById('sinopsis');
+  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
+  const $hero = document.getElementById('hero');
+  const $play = document.getElementById('playBtn');
+  const $modal = document.getElementById('modalPlayer');
+  const $video = document.getElementById('player');
+  const $titulo = document.getElementById('titulo');
+  const $anio = document.getElementById('anio');
+  const $punt = document.getElementById('puntuacion');
+  const $sin = document.getElementById('sinopsis');
 
-  let videoURL='';
+  let videoURL = '';
 
-  if(!tituloParam){
-    $titulo.textContent='Película no encontrada';
-    $play.style.display='none';
-  }else{
-    db.collection('peliculas').where('titulo','==',decodeURIComponent(tituloParam)).get()
-      .then(snap=>{
-        if(snap.empty) throw new Error('No existe');
-        const p=snap.docs[0].data();
-        $titulo.textContent=p.titulo||'Sin título';
-        if(p.anio) $anio.textContent=`Año: ${p.anio}`;
-        if(p.puntuacion) $punt.textContent=`⭐ ${p.puntuacion}/10`;
-        $sin.textContent=p.sinopsis||'Sinopsis no disponible.';
-        $hero.style.backgroundImage=`url(${p.imagen})`;
-        videoURL=p.trailer||p.video||'';
-        if(!videoURL){$play.style.display='none';}
+  if (!tituloParam) {
+    $titulo.textContent = 'Película no encontrada';
+    $play.style.display = 'none';
+  } else {
+    db.collection('peliculas').where('titulo', '==', decodeURIComponent(tituloParam)).get()
+      .then(snap => {
+        if (snap.empty) throw new Error('No existe');
+        const p = snap.docs[0].data();
+        $titulo.textContent = p.titulo || 'Sin título';
+        if (p.anio) $anio.textContent = `Año: ${p.anio}`;
+        if (p.puntuacion) $punt.textContent = `⭐ ${p.puntuacion}/10`;
+        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+        $hero.style.backgroundImage = `url(${p.imagen})`;
+        videoURL = p.trailer || p.video || '';
+        if (!videoURL) $play.style.display = 'none';
       })
-      .catch(e=>{
-        $titulo.textContent='Película no encontrada';
-        $play.style.display='none';
+      .catch(e => {
+        $titulo.textContent = 'Película no encontrada';
+        $play.style.display = 'none';
       });
   }
 
@@ -135,10 +135,12 @@
     const plyr = new Plyr($video, { autoplay: true });
 
     $modal.showModal();
+    $video.focus(); // ✅ Foco en el video para control remoto
 
     try {
       await $video.play();
-      // Solicitar pantalla completa
+
+      // ✅ Pantalla completa
       if ($video.requestFullscreen) await $video.requestFullscreen();
       else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
       else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
@@ -154,7 +156,34 @@
     $video.pause();
     if (document.fullscreenElement) document.exitFullscreen();
   });
+
+  /* -------- CONTROL REMOTO / TECLADO -------- */
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.open) return;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        $video.currentTime -= 10;
+        break;
+      case 'ArrowRight':
+        $video.currentTime += 10;
+        break;
+      case ' ':
+      case 'Enter':
+        if ($video.paused) $video.play();
+        else $video.pause();
+        break;
+      case 'Backspace':
+      case 'Escape':
+        // ⛔ Cerrar modal con tecla BACK
+        $modal.close();
+        $video.pause();
+        if (document.fullscreenElement) document.exitFullscreen();
+        break;
+    }
+  });
 </script>
+
 
 </body>
 </html>
