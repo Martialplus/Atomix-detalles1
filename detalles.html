@@ -2,30 +2,164 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Test reproductor fullscreen</title>
+  <title>Detalles – Atomix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- Plyr CSS y JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
   <style>
+    :root {
+      --primario: #00aaff;
+      --gris: #1b1b1b;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif;
-      display: flex; justify-content: center; align-items: center; height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-    button#playBtn {
-      font-size: 1.5rem; padding: 20px 40px; cursor: pointer;
-      background: #00aaff; border: none; border-radius: 8px; color: white;
-      transition: background 0.3s;
+
+    /* Botón volver */
+    .btn-back {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: 0.25s;
     }
-    button#playBtn:hover {
-      background: #0088cc;
+    .btn-back:hover {
+      background: var(--primario);
+      transform: scale(1.05);
     }
+    .btn-back svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    /* Hero */
+    #hero {
+      width: 100%;
+      height: 60vh;
+      min-height: 360px;
+      background: center / cover no-repeat #222;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 900px;
+    }
+    #hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 15%,
+        rgba(0, 0, 0, 0) 60%
+      );
+      pointer-events: none;
+    }
+
+    /* Botón play */
+    #playBtn {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 96px;
+      height: 96px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+      z-index: 10;
+    }
+    #playBtn svg {
+      width: 42px;
+      height: 42px;
+      fill: #fff;
+      margin-left: 4px;
+    }
+    #playBtn:hover {
+      background: var(--primario);
+      transform: scale(1.1);
+    }
+
+    /* Info */
+    .info {
+      max-width: 900px;
+      width: 100%;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .titulo {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .meta {
+      display: flex;
+      gap: 28px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+    .meta .rating {
+      background: var(--gris);
+      padding: 4px 16px;
+      border-radius: 14px;
+      color: var(--primario);
+      font-weight: 600;
+    }
+    .sinopsis {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      max-width: 100%;
+      color: #ddd;
+    }
+
+    /* Modal Player */
     #modalPlayer {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-      display: none; justify-content: center; align-items: center;
-      flex-direction: column; z-index: 10000;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10000;
     }
     #modalPlayer.show {
       display: flex;
@@ -35,96 +169,188 @@
       height: 50vh !important;
       max-height: 90vh !important;
       background: black;
+      border-radius: 8px;
     }
     #closeBtn {
-      position: absolute; top: 20px; right: 20px; background: #00aaff;
-      border: none; padding: 10px 15px; font-size: 1rem; border-radius: 6px;
-      cursor: pointer; color: white;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--primario);
+      border: none;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
       z-index: 10001;
+      transition: background 0.3s;
+    }
+    #closeBtn:hover {
+      background: #0088cc;
+    }
+
+    @media (max-width: 900px) {
+      .titulo {
+        font-size: 2rem;
+      }
+      .meta {
+        font-size: 1rem;
+        gap: 16px;
+      }
+      .sinopsis {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
-  <button id="playBtn">▶ Reproducir Video</button>
+  <button class="btn-back" onclick="history.back()" aria-label="Volver">
+    <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
+  </button>
 
+  <section id="hero">
+    <button id="playBtn" aria-label="Reproducir">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+  </section>
+
+  <section class="info">
+    <h1 id="titulo" class="titulo">Cargando…</h1>
+    <div class="meta">
+      <span id="anio"></span>
+      <span id="puntuacion" class="rating"></span>
+    </div>
+    <p id="sinopsis" class="sinopsis"></p>
+  </section>
+
+  <!-- Modal Player -->
   <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
     <button id="closeBtn" aria-label="Cerrar reproductor">✕ Cerrar</button>
     <video id="player" playsinline controls></video>
   </div>
 
-  <script>
-    const playBtn = document.getElementById('playBtn');
-    const modal = document.getElementById('modalPlayer');
-    const closeBtn = document.getElementById('closeBtn');
-    const video = document.getElementById('player');
-    let plyr = null;
+<script>
+  // Firebase config + inicialización
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+    authDomain: "atomix-54e1a.firebaseapp.com",
+    projectId: "atomix-54e1a",
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    // Video de prueba con duración real > 1 minuto
-    const testVideoURL = "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4";
+  // Elementos DOM
+  const $hero = document.getElementById('hero');
+  const $play = document.getElementById('playBtn');
+  const $modal = document.getElementById('modalPlayer');
+  const $video = document.getElementById('player');
+  const $titulo = document.getElementById('titulo');
+  const $anio = document.getElementById('anio');
+  const $punt = document.getElementById('puntuacion');
+  const $sin = document.getElementById('sinopsis');
 
-    function openModal() {
-      console.log('Abrir modal y reproducir video...');
-      modal.classList.add('show');
-      video.src = testVideoURL;
+  let videoURL = '';
 
-      if (plyr) {
-        plyr.destroy();
-      }
+  // Obtener parámetro título URL
+  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
-      plyr = new Plyr(video, {
-        autoplay: true,
-        controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
+  if (!tituloParam) {
+    $titulo.textContent = 'Película no encontrada';
+    $play.style.display = 'none';
+  } else {
+    db.collection('peliculas')
+      .where('titulo', '==', decodeURIComponent(tituloParam))
+      .get()
+      .then(snap => {
+        if (snap.empty) throw new Error('No existe la película');
+        const p = snap.docs[0].data();
+
+        // Rellenar info en la página
+        $titulo.textContent = p.titulo || 'Sin título';
+        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
+        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
+
+        // Guardar URL del video/trailer para reproducir
+        videoURL = p.trailer || p.video || '';
+
+        if (!videoURL) {
+          $play.style.display = 'none';
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        $titulo.textContent = 'Película no encontrada';
+        $play.style.display = 'none';
       });
+  }
 
-      video.play().then(() => {
-        console.log('Video reproduciéndose');
-      }).catch(e => {
-        console.warn('No se pudo reproducir automáticamente:', e);
-      });
+  // Plyr instancia
+  let plyr = null;
 
-      // Intentar fullscreen nativo en modal para pantalla completa
-      if (modal.requestFullscreen) {
-        modal.requestFullscreen().catch(() => {});
-      } else if (modal.webkitRequestFullscreen) {
-        modal.webkitRequestFullscreen();
-      } else if (modal.msRequestFullscreen) {
-        modal.msRequestFullscreen();
-      }
+  // Abrir modal y reproducir video fullscreen
+  function openModal() {
+    if (!videoURL) return;
+
+    $modal.classList.add('show');
+    $video.src = videoURL;
+
+    // Destruye instancia previa si hay
+    if (plyr) {
+      plyr.destroy();
     }
 
-    function closeModal() {
-      console.log('Cerrar modal y detener video');
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-      modal.classList.remove('show');
-
-      if (plyr) {
-        plyr.destroy();
-        plyr = null;
-      }
-
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
-    }
-
-    playBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
-
-    // CUIDADO: no cerramos modal al terminar video en este ejemplo
-    // porque causaba cierre inesperado
-    // video.addEventListener('ended', closeModal);
-
-    // Cerrar con Escape
-    document.addEventListener('keydown', (e) => {
-      if (!modal.classList.contains('show')) return;
-      if (e.key === 'Escape') {
-        closeModal();
-      }
+    plyr = new Plyr($video, {
+      autoplay: true,
+      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
     });
-  </script>
+
+    $video.play().catch(() => {
+      // Si autoplay falla, el usuario debe dar play manualmente
+    });
+
+    // Solicitar fullscreen del modal (la capa que contiene video)
+    if ($modal.requestFullscreen) {
+      $modal.requestFullscreen().catch(() => {});
+    } else if ($modal.webkitRequestFullscreen) {
+      $modal.webkitRequestFullscreen();
+    } else if ($modal.msRequestFullscreen) {
+      $modal.msRequestFullscreen();
+    }
+  }
+
+  // Cerrar modal y parar video
+  function closeModal() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    $modal.classList.remove('show');
+
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    $video.pause();
+    $video.removeAttribute('src');
+    $video.load();
+  }
+
+  // Eventos
+  $play.addEventListener('click', openModal);
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
+
+  // Cerrar modal con Escape
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.classList.contains('show')) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      closeModal();
+    }
+  });
+</script>
 
 </body>
 </html>
