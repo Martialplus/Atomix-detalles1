@@ -35,7 +35,6 @@
       padding: 20px;
     }
 
-    /* Botón volver */
     .btn-back {
       position: fixed;
       top: 24px;
@@ -63,7 +62,6 @@
       fill: #fff;
     }
 
-    /* Hero */
     #hero {
       width: 100%;
       height: 60vh;
@@ -87,7 +85,6 @@
       pointer-events: none;
     }
 
-    /* Botón play */
     #playBtn {
       position: absolute;
       inset: 0;
@@ -116,7 +113,6 @@
       transform: scale(1.1);
     }
 
-    /* Info */
     .info {
       max-width: 900px;
       width: 100%;
@@ -150,27 +146,30 @@
       color: #ddd;
     }
 
-    /* Modal Player */
+    /* Modal Player - ahora ocupa toda la pantalla */
     #modalPlayer {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.95);
+      background: #000;
       display: none;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       z-index: 10000;
     }
     #modalPlayer.show {
       display: flex;
     }
+
+    /* Video ocupa toda la pantalla, sin borde */
     #player {
-      width: 90vw !important;
-      height: 50vh !important;
-      max-height: 90vh !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
       background: black;
-      border-radius: 8px;
+      border-radius: 0;
     }
+
     #closeBtn {
       position: absolute;
       top: 20px;
@@ -240,7 +239,6 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Elementos DOM
   const $hero = document.getElementById('hero');
   const $play = document.getElementById('playBtn');
   const $modal = document.getElementById('modalPlayer');
@@ -252,7 +250,6 @@
 
   let videoURL = '';
 
-  // Obtener parámetro título URL
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
   if (!tituloParam) {
@@ -266,14 +263,12 @@
         if (snap.empty) throw new Error('No existe la película');
         const p = snap.docs[0].data();
 
-        // Rellenar info en la página
         $titulo.textContent = p.titulo || 'Sin título';
         $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        // Guardar URL del video/trailer para reproducir
         videoURL = p.trailer || p.video || '';
 
         if (!videoURL) {
@@ -287,17 +282,14 @@
       });
   }
 
-  // Plyr instancia
   let plyr = null;
 
-  // Abrir modal y reproducir video fullscreen
-  function openModal() {
+  async function openModal() {
     if (!videoURL) return;
 
     $modal.classList.add('show');
     $video.src = videoURL;
 
-    // Destruye instancia previa si hay
     if (plyr) {
       plyr.destroy();
     }
@@ -307,24 +299,25 @@
       controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
     });
 
-    $video.play().catch(() => {
-      // Si autoplay falla, el usuario debe dar play manualmente
-    });
+    try {
+      await $video.play();
 
-    // Solicitar fullscreen del modal (la capa que contiene video)
-    if ($modal.requestFullscreen) {
-      $modal.requestFullscreen().catch(() => {});
-    } else if ($modal.webkitRequestFullscreen) {
-      $modal.webkitRequestFullscreen();
-    } else if ($modal.msRequestFullscreen) {
-      $modal.msRequestFullscreen();
+      // Aquí pedimos fullscreen en el video para que se expanda TODO
+      if ($modal.requestFullscreen) {
+        await $modal.requestFullscreen();
+      } else if ($modal.webkitRequestFullscreen) {
+        await $modal.webkitRequestFullscreen();
+      } else if ($modal.msRequestFullscreen) {
+        await $modal.msRequestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Error fullscreen/autoplay:', e);
     }
   }
 
-  // Cerrar modal y parar video
-  function closeModal() {
+  async function closeModal() {
     if (document.fullscreenElement) {
-      document.exitFullscreen();
+      await document.exitFullscreen();
     }
     $modal.classList.remove('show');
 
@@ -338,12 +331,10 @@
     $video.load();
   }
 
-  // Eventos
   $play.addEventListener('click', openModal);
   document.getElementById('closeBtn').addEventListener('click', closeModal);
   $video.addEventListener('ended', closeModal);
 
-  // Cerrar modal con Escape
   document.addEventListener('keydown', (e) => {
     if (!$modal.classList.contains('show')) return;
     if (e.key === 'Escape' || e.key === 'Backspace') {
