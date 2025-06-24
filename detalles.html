@@ -1,261 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Detalles – Atomix</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-  <!-- Player library -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
-
-<style>
-  :root {
-    --primario: #00aaff;
-    --gris: #1b1b1b;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #000;
-    color: #fff;
-    overflow-x: hidden;
-  }
-
-  .btn-back {
-    position: fixed;
-    top: 24px;
-    left: 24px;
-    z-index: 100;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    transition: 0.25s;
-  }
-
-  .btn-back:hover {
-    background: var(--primario);
-    transform: scale(1.05);
-  }
-
-  .btn-back svg {
-    width: 24px;
-    height: 24px;
-    fill: #fff;
-  }
-
-  .hero {
-    width: 100%;
-    height: 60vh;
-    min-height: 360px;
-    background: center/cover #222 no-repeat;
-    position: relative;
-  }
-
-  .hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 15%, rgba(0, 0, 0, 0) 60%);
-  }
-
-  .btn-play {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 96px;
-    height: 96px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.25s, transform 0.25s;
-    z-index: 10;
-  }
-
-  .btn-play svg {
-    width: 42px;
-    height: 42px;
-    fill: #fff;
-    margin-left: 4px;
-  }
-
-  .btn-play:hover {
-    background: var(--primario);
-    transform: scale(1.1);
-  }
-
-  .info {
-    width: 100%;
-    padding: 40px 6vw;
-    max-width: 1600px;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .titulo {
-    font-size: 3.5vw;
-    min-font-size: 32px;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .meta {
-    display: flex;
-    gap: 28px;
-    font-size: 1.2vw;
-    min-font-size: 15px;
-    color: #aaa;
-  }
-
-  .meta .rating {
-    background: var(--gris);
-    padding: 4px 16px;
-    border-radius: 14px;
-    color: var(--primario);
-    font-weight: 600;
-  }
-
-  .sinopsis {
-    max-width: 90vw;
-    font-size: 1.1vw;
-    min-font-size: 15px;
-    line-height: 1.6;
-  }
-
-  dialog#modalPlayer {
-    width: 100vw;
-    height: 100vh;
-    border: none;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.92);
-  }
-
-  dialog::backdrop {
-    background: rgba(0, 0, 0, 0.85);
-  }
-
-  .plyr,
-  #player {
-    height: 100%;
-    width: 100%;
-    background: #000;
-    max-height: 100vh;
-    max-width: 100vw;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 20px;
-    right: 28px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    z-index: 20;
-  }
-
-  .modal-close svg {
-    width: 28px;
-    height: 28px;
-    fill: #fff;
-    transition: transform 0.25s;
-  }
-
-  .modal-close:hover svg {
-    transform: rotate(90deg);
-  }
-
-  /* Pantalla completa forzada */
-  dialog#modalPlayer:fullscreen,
-  dialog#modalPlayer:-webkit-full-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-  }
-
-  .plyr:fullscreen video,
-  .plyr:-webkit-full-screen video,
-  video:-webkit-full-screen {
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-
-  @media (max-width: 900px) {
-    .titulo {
-      font-size: 28px;
-    }
-
-    .meta {
-      font-size: 14px;
-    }
-
-    .sinopsis {
-      font-size: 15px;
-    }
-  }
-</style>
-
-
-</head>
-<body>
-  <button class="btn-back" onclick="history.back()" aria-label="Volver">
-    <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
-  </button>
-
-  <section id="hero" class="hero">
-    <button id="playBtn" class="btn-play" aria-label="Reproducir">
-      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    </button>
-  </section>
-
-  <section class="info">
-    <h1 id="titulo" class="titulo">Cargando…</h1>
-    <div class="meta">
-      <span id="anio"></span>
-      <span id="puntuacion" class="rating"></span>
-    </div>
-    <p id="sinopsis" class="sinopsis"></p>
-  </section>
-
-  <!-- Modal Player -->
-  <dialog id="modalPlayer">
-    <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal()">
-      <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
-    </button>
-    <video id="player" class="plyr" controls playsinline></video>
-  </dialog>
-
 <script>
   /* -------- Firebase ---------- */
-  firebase.initializeApp({apiKey:"AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",authDomain:"atomix-54e1a.firebaseapp.com",projectId:"atomix-54e1a"});
+  firebase.initializeApp({
+    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+    authDomain: "atomix-54e1a.firebaseapp.com",
+    projectId: "atomix-54e1a"
+  });
   const db = firebase.firestore();
 
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
@@ -269,6 +18,7 @@
   const $sin = document.getElementById('sinopsis');
 
   let videoURL = '';
+  let plyr = null;
 
   if (!tituloParam) {
     $titulo.textContent = 'Película no encontrada';
@@ -292,38 +42,33 @@
       });
   }
 
-  let plyr = null;
-
   /* -------- Abrir player en pantalla completa -------- */
   $play.addEventListener('click', async () => {
     if (!videoURL) return;
 
     $video.src = videoURL;
 
-    // Elimina instancia previa de Plyr si existe
     if (plyr) {
       plyr.destroy();
       plyr = null;
     }
 
-    // Inicia modal
     $modal.showModal();
 
-    // Esperar un poco para asegurar que el DOM del modal esté listo
     setTimeout(async () => {
       plyr = new Plyr($video, { autoplay: true });
 
       try {
         await $video.play();
 
-        // Forzar fullscreen en el contenedor (el modal)
-        if ($modal.requestFullscreen) await $modal.requestFullscreen();
-        else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
-        else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
+        // ✅ Pantalla completa sobre el VIDEO directamente
+        if ($video.requestFullscreen) await $video.requestFullscreen();
+        else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
+        else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
       } catch (e) {
         console.warn("No se pudo reproducir automáticamente:", e.message);
       }
-    }, 200); // delay leve para estabilidad
+    }, 200);
   });
 
   /* -------- Cerrar modal -------- */
@@ -337,7 +82,6 @@
       plyr = null;
     }
 
-    // Limpia la fuente para evitar que siga cargando
     $video.removeAttribute('src');
     $video.load();
   }
@@ -371,7 +115,3 @@
     }
   });
 </script>
-
-
-</body>
-</html>
