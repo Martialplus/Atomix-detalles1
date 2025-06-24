@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Player library (opcional: Plyr) -->
+  <!-- Player library -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
@@ -21,31 +21,26 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:Arial,Helvetica,sans-serif;background:#000;color:#fff;overflow-x:hidden}
 
-    /* Botón volver */
     .btn-back{position:fixed;top:24px;left:24px;z-index:100;width:48px;height:48px;
       display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;
       background:rgba(0,0,0,.55);backdrop-filter:blur(6px);cursor:pointer;transition:.25s}
     .btn-back:hover{background:var(--primario);transform:scale(1.05)}
     .btn-back svg{width:24px;height:24px;fill:#fff}
 
-    /* Hero */
     .hero{width:100%;height:60vh;min-height:360px;background:center/cover #222 no-repeat;position:relative}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 15%,rgba(0,0,0,0) 60%)}
-    /* Botón play encima */
     .btn-play{position:absolute;inset:0;margin:auto;width:96px;height:96px;border:none;border-radius:50%;
       background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;
       transition:background .25s,transform .25s;z-index:10}
     .btn-play svg{width:42px;height:42px;fill:#fff;margin-left:4px}
     .btn-play:hover{background:var(--primario);transform:scale(1.1)}
 
-    /* Info */
     .info{width:100%;padding:40px 6vw;max-width:1600px;margin:auto;display:flex;flex-direction:column;gap:24px}
     .titulo{font-size:3.5vw;min-font-size:32px;font-weight:700;line-height:1.2}
     .meta{display:flex;gap:28px;font-size:1.2vw;min-font-size:15px;color:#aaa}
     .meta .rating{background:var(--gris);padding:4px 16px;border-radius:14px;color:var(--primario);font-weight:600}
     .sinopsis{max-width:90vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
 
-    /* Modal Player */
     dialog#modalPlayer{width:100vw;height:100vh;border:none;padding:0;background:rgba(0,0,0,.92)}
     dialog::backdrop{background:rgba(0,0,0,.85)}
     .plyr{height:100%;background:#000}
@@ -82,7 +77,7 @@
 
   <!-- Modal Player -->
   <dialog id="modalPlayer">
-    <button class="modal-close" aria-label="Cerrar" onclick="modal.close()">
+    <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal()">
       <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
     </button>
     <video id="player" class="plyr" controls playsinline></video>
@@ -127,7 +122,7 @@
       });
   }
 
-  /* -------- Abrir player en fullscreen + autoplay -------- */
+  /* -------- Abrir player a pantalla completa -------- */
   $play.addEventListener('click', async () => {
     if (!videoURL) return;
 
@@ -135,55 +130,52 @@
     const plyr = new Plyr($video, { autoplay: true });
 
     $modal.showModal();
-    $video.focus(); // ✅ Foco en el video para control remoto
 
-    try {
-      await $video.play();
+    setTimeout(async () => {
+      try {
+        await $video.play();
 
-      // ✅ Pantalla completa
-      if ($video.requestFullscreen) await $video.requestFullscreen();
-      else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
-      else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
-    } catch (e) {
-      console.warn("No se pudo reproducir automáticamente:", e.message);
-    }
+        if ($modal.requestFullscreen) await $modal.requestFullscreen();
+        else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
+        else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
+      } catch (e) {
+        console.warn("No se pudo reproducir automáticamente:", e.message);
+      }
+    }, 100);
   });
 
-  // Cerrar modal y detener video
-  const modal = document.getElementById('modalPlayer');
-  document.querySelector('.modal-close').addEventListener('click', () => {
+  /* -------- Cerrar modal -------- */
+  function cerrarModal() {
     $modal.close();
     $video.pause();
     if (document.fullscreenElement) document.exitFullscreen();
+  }
+
+  // Cierre automático al pausar o terminar
+  $video.addEventListener('pause', () => {
+    setTimeout(() => {
+      if ($video.paused && !$video.ended) cerrarModal();
+    }, 500);
   });
 
-  /* -------- CONTROL REMOTO / TECLADO -------- */
+  $video.addEventListener('ended', cerrarModal);
+
+  /* -------- Teclado -------- */
   document.addEventListener('keydown', (e) => {
     if (!$modal.open) return;
 
     switch (e.key) {
-      case 'ArrowLeft':
-        $video.currentTime -= 10;
-        break;
-      case 'ArrowRight':
-        $video.currentTime += 10;
-        break;
-      case ' ':
-      case 'Enter':
-        if ($video.paused) $video.play();
-        else $video.pause();
+      case 'ArrowLeft': $video.currentTime -= 10; break;
+      case 'ArrowRight': $video.currentTime += 10; break;
+      case ' ': case 'Enter':
+        if ($video.paused) $video.play(); else $video.pause();
         break;
       case 'Backspace':
       case 'Escape':
-        // ⛔ Cerrar modal con tecla BACK
-        $modal.close();
-        $video.pause();
-        if (document.fullscreenElement) document.exitFullscreen();
+        cerrarModal();
         break;
     }
   });
 </script>
-
-
 </body>
 </html>
