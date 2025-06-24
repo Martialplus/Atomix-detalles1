@@ -60,9 +60,11 @@
     const video = document.getElementById('player');
     let plyr = null;
 
-    const testVideoURL = "https://cdn.plyr.io/static/blank.mp4"; // Video ejemplo que siempre funciona
+    // Video de prueba con duración real > 1 minuto
+    const testVideoURL = "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4";
 
     function openModal() {
+      console.log('Abrir modal y reproducir video...');
       modal.classList.add('show');
       video.src = testVideoURL;
 
@@ -75,8 +77,10 @@
         controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
       });
 
-      video.play().catch(() => {
-        // Autoplay puede bloquearse, botón play del plyr mostrará
+      video.play().then(() => {
+        console.log('Video reproduciéndose');
+      }).catch(e => {
+        console.warn('No se pudo reproducir automáticamente:', e);
       });
 
       // Intentar fullscreen nativo en modal para pantalla completa
@@ -90,6 +94,7 @@
     }
 
     function closeModal() {
+      console.log('Cerrar modal y detener video');
       if (document.fullscreenElement) {
         document.exitFullscreen();
       }
@@ -108,7 +113,9 @@
     playBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
 
-    video.addEventListener('ended', closeModal);
+    // CUIDADO: no cerramos modal al terminar video en este ejemplo
+    // porque causaba cierre inesperado
+    // video.addEventListener('ended', closeModal);
 
     // Cerrar con Escape
     document.addEventListener('keydown', (e) => {
