@@ -302,7 +302,7 @@
     try {
       await $video.play();
 
-      // Aquí pedimos fullscreen en el video para que se expanda TODO
+      // Pedir fullscreen en el modal para que el video ocupe toda la pantalla
       if ($modal.requestFullscreen) {
         await $modal.requestFullscreen();
       } else if ($modal.webkitRequestFullscreen) {
@@ -316,19 +316,31 @@
   }
 
   async function closeModal() {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    }
-    $modal.classList.remove('show');
+    try {
+      // Pausar el video
+      $video.pause();
 
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
+      // Destruir Plyr
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
+      }
 
-    $video.pause();
-    $video.removeAttribute('src');
-    $video.load();
+      // Limpiar el src para que deje de sonar y cargar video
+      $video.removeAttribute('src');
+      $video.load();
+
+      // Salir de pantalla completa si está activo
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+
+      // Ocultar modal
+      $modal.classList.remove('show');
+
+    } catch (error) {
+      console.error('Error cerrando modal:', error);
+    }
   }
 
   $play.addEventListener('click', openModal);
@@ -342,6 +354,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
