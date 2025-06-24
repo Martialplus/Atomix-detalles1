@@ -303,24 +303,38 @@
 
     $video.setAttribute('src', videoURL);
     $video.setAttribute('playsinline', true);
+
     $modal.showModal();
 
-    setTimeout(async () => {
-      if (!plyr) {
-        plyr = new Plyr($video, { autoplay: true });
-      }
+    // Destruye instancia previa de Plyr para evitar conflictos
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
 
-      try {
-        await $video.play();
+    plyr = new Plyr($video, { autoplay: true });
 
-        // Pantalla completa directa en el video
-        if ($video.requestFullscreen) await $video.requestFullscreen();
-        else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
-        else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
-      } catch (e) {
-        console.warn("Error al reproducir:", e.message);
-      }
-    }, 200);
+    try {
+      // Espera a que el video esté listo para reproducir
+      await new Promise((resolve, reject) => {
+        if ($video.readyState >= 3) {
+          resolve();
+        } else {
+          $video.addEventListener('canplay', resolve, { once: true });
+          $video.addEventListener('error', reject, { once: true });
+        }
+      });
+
+      await $video.play();
+
+      // Pantalla completa directa en el video
+      if ($video.requestFullscreen) await $video.requestFullscreen();
+      else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
+      else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
+
+    } catch (e) {
+      console.warn("Error al reproducir o fullscreen:", e.message);
+    }
   });
 
   /* -------- Cerrar modal -------- */
@@ -330,7 +344,7 @@
     $video.pause();
 
     $video.removeAttribute('src');
-    $video.load(); // evita que se siga escuchando
+    $video.load();
 
     if (plyr) {
       plyr.destroy();
@@ -344,7 +358,7 @@
   // Al terminar el video
   $video.addEventListener('ended', cerrarModal);
 
-  // Teclado
+  // Control con teclado
   document.addEventListener('keydown', (e) => {
     if (!$modal.open) return;
 
@@ -358,11 +372,8 @@
       case ' ':
       case 'Enter':
         e.preventDefault();
-        if ($video.paused) {
-          $video.play();
-        } else {
-          $video.pause();
-        }
+        if ($video.paused) $video.play();
+        else $video.pause();
         break;
       case 'Escape':
       case 'Backspace':
@@ -371,6 +382,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
