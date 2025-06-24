@@ -9,76 +9,196 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Plyr -->
+  <!-- Plyr CSS y JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
   <style>
-    :root { --primario:#00aaff; --gris:#1b1b1b; }
-    * { margin:0; padding:0; box-sizing:border-box }
-    body { font-family:Arial,Helvetica,sans-serif; background:#000; color:#fff; overflow-x:hidden }
+    :root {
+      --primario: #00aaff;
+      --gris: #1b1b1b;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
     .btn-back {
-      position:fixed; top:24px; left:24px; z-index:100;
-      width:48px; height:48px;
-      display:flex; align-items:center; justify-content:center;
-      border:none; border-radius:50%;
-      background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
-      cursor:pointer; transition:.25s
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: 0.25s;
     }
-    .btn-back:hover { background:var(--primario); transform:scale(1.05) }
-    .btn-back svg { width:24px; height:24px; fill:#fff }
+    .btn-back:hover {
+      background: var(--primario);
+      transform: scale(1.05);
+    }
+    .btn-back svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
 
-    .hero {
-      width:100%; height:60vh; min-height:360px;
-      background:center/cover #222 no-repeat; position:relative
+    #hero {
+      width: 100%;
+      height: 60vh;
+      min-height: 360px;
+      background: center / cover no-repeat #222;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 900px;
     }
-    .hero::after {
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(to top,rgba(0,0,0,.85) 15%,rgba(0,0,0,0) 60%)
+    #hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 15%,
+        rgba(0, 0, 0, 0) 60%
+      );
+      pointer-events: none;
     }
-    .btn-play {
-      position:absolute; inset:0; margin:auto;
-      width:96px; height:96px;
-      border:none; border-radius:50%;
-      background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; transition:.25s; z-index:10
+
+    #playBtn {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 96px;
+      height: 96px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+      z-index: 10;
     }
-    .btn-play svg { width:42px; height:42px; fill:#fff; margin-left:4px }
-    .btn-play:hover { background:var(--primario); transform:scale(1.1) }
+    #playBtn svg {
+      width: 42px;
+      height: 42px;
+      fill: #fff;
+      margin-left: 4px;
+    }
+    #playBtn:hover {
+      background: var(--primario);
+      transform: scale(1.1);
+    }
 
     .info {
-      width:100%; padding:40px 6vw; max-width:1600px; margin:auto;
-      display:flex; flex-direction:column; gap:24px
+      max-width: 900px;
+      width: 100%;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
-    .titulo { font-size:3.5vw; font-weight:700; line-height:1.2 }
-    .meta { display:flex; gap:28px; font-size:1.2vw; color:#aaa }
+    .titulo {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .meta {
+      display: flex;
+      gap: 28px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
     .meta .rating {
-      background:var(--gris); padding:4px 16px; border-radius:14px;
-      color:var(--primario); font-weight:600
+      background: var(--gris);
+      padding: 4px 16px;
+      border-radius: 14px;
+      color: var(--primario);
+      font-weight: 600;
     }
-    .sinopsis { max-width:90vw; font-size:1.1vw; line-height:1.6 }
+    .sinopsis {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      max-width: 100%;
+      color: #ddd;
+    }
 
-    dialog#modalPlayer {
-      width:100vw; height:100vh; border:none; padding:0;
-      background:rgba(0,0,0,.92)
+    /* Modal Player - ahora ocupa toda la pantalla */
+    #modalPlayer {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
     }
-    dialog::backdrop { background:rgba(0,0,0,.85) }
-    .plyr { width:100%; height:100%; background:#000 }
-    .modal-close {
-      position:absolute; top:20px; right:28px;
-      border:none; background:none; cursor:pointer; z-index:20
+    #modalPlayer.show {
+      display: flex;
     }
-    .modal-close svg {
-      width:28px; height:28px; fill:#fff; transition:transform .25s
-    }
-    .modal-close:hover svg { transform:rotate(90deg) }
 
-    @media(max-width:900px) {
-      .titulo { font-size:28px }
-      .meta { font-size:14px }
-      .sinopsis { font-size:15px }
+    /* Video ocupa toda la pantalla, sin borde */
+    #player {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      background: black;
+      border-radius: 0;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--primario);
+      border: none;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      z-index: 10001;
+      transition: background 0.3s;
+    }
+    #closeBtn:hover {
+      background: #0088cc;
+    }
+
+    @media (max-width: 900px) {
+      .titulo {
+        font-size: 2rem;
+      }
+      .meta {
+        font-size: 1rem;
+        gap: 16px;
+      }
+      .sinopsis {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
@@ -88,8 +208,8 @@
     <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
   </button>
 
-  <section id="hero" class="hero">
-    <button id="playBtn" class="btn-play" aria-label="Reproducir">
+  <section id="hero">
+    <button id="playBtn" aria-label="Reproducir">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
   </section>
@@ -103,50 +223,153 @@
     <p id="sinopsis" class="sinopsis"></p>
   </section>
 
-  <!-- Modal player -->
-  <dialog id="modalPlayer">
-    <button id="closeBtn" class="modal-close" aria-label="Cerrar">
-      <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
-    </button>
-    <video id="player" class="plyr" controls playsinline></video>
-  </dialog>
+  <!-- Modal Player -->
+  <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
+    <button id="closeBtn" aria-label="Cerrar reproductor">✕ Cerrar</button>
+    <video id="player" playsinline controls></video>
+  </div>
 
-  <script>
-    // Firebase
-    firebase.initializeApp({
-      apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
-      authDomain: "atomix-54e1a.firebaseapp.com",
-      projectId: "atomix-54e1a"
+<script>
+  // Configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+    authDomain: "atomix-54e1a.firebaseapp.com",
+    projectId: "atomix-54e1a",
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Referencias DOM
+  const $hero = document.getElementById('hero');
+  const $play = document.getElementById('playBtn');
+  const $modal = document.getElementById('modalPlayer');
+  const $video = document.getElementById('player');
+  const $titulo = document.getElementById('titulo');
+  const $anio = document.getElementById('anio');
+  const $punt = document.getElementById('puntuacion');
+  const $sin = document.getElementById('sinopsis');
+
+  let videoURL = '';
+  let plyr = null;
+
+  // Obtener parámetro del título desde la URL
+  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
+
+  if (!tituloParam) {
+    $titulo.textContent = 'Película no encontrada';
+    $play.style.display = 'none';
+  } else {
+    db.collection('peliculas')
+      .where('titulo', '==', decodeURIComponent(tituloParam))
+      .get()
+      .then(snap => {
+        if (snap.empty) throw new Error('No existe la película');
+        const p = snap.docs[0].data();
+
+        $titulo.textContent = p.titulo || 'Sin título';
+        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
+        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
+
+        videoURL = p.trailer || p.video || '';
+
+        if (!videoURL) {
+          $play.style.display = 'none';
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        $titulo.textContent = 'Película no encontrada';
+        $play.style.display = 'none';
+      });
+  }
+
+  // Función para abrir el modal y reproducir el video
+  async function openModal() {
+    if (!videoURL) return;
+
+    $modal.classList.add('show');
+
+    // Limpiar reproductor previo si existe
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    $video.removeAttribute('src');
+    $video.load();
+    $video.src = videoURL;
+
+    // Crear nueva instancia de Plyr
+    plyr = new Plyr($video, {
+      autoplay: true,
+      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
     });
-    const db = firebase.firestore();
 
-    const $hero = document.getElementById('hero');
-    const $play = document.getElementById('playBtn');
-    const $modal = document.getElementById('modalPlayer');
-    const $video = document.getElementById('player');
-    const $titulo = document.getElementById('titulo');
-    const $anio = document.getElementById('anio');
-    const $punt = document.getElementById('puntuacion');
-    const $sin = document.getElementById('sinopsis');
+    try {
+      await $video.play();
 
-    let videoURL = '';
-    let plyr = new Plyr($video);
+      // Abrir en pantalla completa
+      if ($modal.requestFullscreen) {
+        await $modal.requestFullscreen();
+      } else if ($modal.webkitRequestFullscreen) {
+        await $modal.webkitRequestFullscreen();
+      } else if ($modal.msRequestFullscreen) {
+        await $modal.msRequestFullscreen();
+      }
 
-    const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
+    } catch (e) {
+      console.warn('Error al reproducir en fullscreen:', e);
+    }
+  }
 
-    if (!tituloParam) {
-      $titulo.textContent = 'Película no encontrada';
-      $play.style.display = 'none';
-    } else {
-      db.collection('peliculas')
-        .where('titulo', '==', decodeURIComponent(tituloParam))
-        .get()
-        .then(snap => {
-          if (snap.empty) throw new Error('No existe');
-          const p = snap.docs[0].data();
-          $titulo.textContent = p.titulo || 'Sin título';
-          if (p.anio) $anio.textContent = `Año: ${p.anio}`;
-          if (p.puntuacion) $punt.textContent = `⭐ ${p.puntuacion}/10`;
-          $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-          $hero.style.backgroundImage = `url(${p.imagen})`;
-          videoURL = p.tra
+  // Función para cerrar el modal y detener todo
+  async function closeModal() {
+    try {
+      // Pausar inmediatamente
+      $video.pause();
+
+      // Quitar fuente y reiniciar
+      $video.removeAttribute('src');
+      $video.load();
+
+      // Salir de fullscreen
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+
+      // Ocultar modal
+      $modal.classList.remove('show');
+
+      // Esperar un poco y destruir Plyr correctamente
+      setTimeout(() => {
+        if (plyr) {
+          plyr.destroy();
+          plyr = null;
+        }
+      }, 300);
+
+    } catch (error) {
+      console.error('Error al cerrar modal:', error);
+    }
+  }
+
+  // Eventos
+  $play.addEventListener('click', openModal);
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
+
+  // Teclado: cerrar con ESC o BACK
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.classList.contains('show')) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      closeModal();
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
