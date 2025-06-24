@@ -122,53 +122,86 @@
       });
   }
 
-  /* -------- Abrir player a pantalla completa -------- */
+  let plyr = null;
+
+  /* -------- Abrir player en pantalla completa -------- */
   $play.addEventListener('click', async () => {
     if (!videoURL) return;
 
     $video.src = videoURL;
-    const plyr = new Plyr($video, { autoplay: true });
 
+    // Elimina instancia previa de Plyr si existe
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    // Inicia modal
     $modal.showModal();
 
+    // Esperar un poco para asegurar que el DOM del modal esté listo
     setTimeout(async () => {
+      plyr = new Plyr($video, { autoplay: true });
+
       try {
         await $video.play();
 
+        // Forzar fullscreen en el contenedor (el modal)
         if ($modal.requestFullscreen) await $modal.requestFullscreen();
         else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
         else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
       } catch (e) {
         console.warn("No se pudo reproducir automáticamente:", e.message);
       }
-    }, 100);
+    }, 200); // delay leve para estabilidad
   });
 
   /* -------- Cerrar modal -------- */
   function cerrarModal() {
+    if (document.fullscreenElement) document.exitFullscreen();
     $modal.close();
     $video.pause();
-    if (document.fullscreenElement) document.exitFullscreen();
+
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    // Limpia la fuente para evitar que siga cargando
+    $video.removeAttribute('src');
+    $video.load();
   }
 
+  // Botón cerrar
+  document.querySelector('.modal-close').addEventListener('click', cerrarModal);
+
+  // Al terminar el video
   $video.addEventListener('ended', cerrarModal);
 
-  /* -------- Teclado -------- */
+  // Teclado
   document.addEventListener('keydown', (e) => {
     if (!$modal.open) return;
 
     switch (e.key) {
-      case 'ArrowLeft': $video.currentTime -= 10; break;
-      case 'ArrowRight': $video.currentTime += 10; break;
-      case ' ': case 'Enter':
+      case 'ArrowLeft':
+        $video.currentTime -= 10;
+        break;
+      case 'ArrowRight':
+        $video.currentTime += 10;
+        break;
+      case ' ':
+      case 'Enter':
+        e.preventDefault();
         if ($video.paused) $video.play(); else $video.pause();
         break;
-      case 'Backspace':
       case 'Escape':
+      case 'Backspace':
         cerrarModal();
         break;
     }
   });
 </script>
+
+
 </body>
 </html>
