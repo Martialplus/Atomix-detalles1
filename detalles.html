@@ -41,7 +41,6 @@
     .meta .rating{background:var(--gris);padding:4px 16px;border-radius:14px;color:var(--primario);font-weight:600}
     .sinopsis{max-width:90vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
 
-    /* Modal con div */
     #modalPlayer {
       display: none;
       position: fixed;
@@ -76,12 +75,6 @@
     }
     #closeBtn:hover {
       background: var(--primario);
-    }
-
-    @media(max-width:900px){
-      .titulo{font-size:28px}
-      .meta{font-size:14px}
-      .sinopsis{font-size:15px}
     }
   </style>
 </head>
@@ -146,11 +139,13 @@
           $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
           $hero.style.backgroundImage = `url(${p.imagen})`;
           videoURL = p.trailer || p.video || '';
+          console.log("Video URL cargado:", videoURL);
           if (!videoURL) $play.style.display = 'none';
         })
         .catch(e => {
           $titulo.textContent = 'Película no encontrada';
           $play.style.display = 'none';
+          console.error("Error al cargar datos:", e);
         });
 
     }
@@ -159,7 +154,10 @@
     plyr = new Plyr($video, { autoplay: false });
 
     async function openPlayer() {
-      if (!videoURL) return;
+      if (!videoURL) {
+        console.warn("No hay URL para el video");
+        return;
+      }
 
       $modal.classList.add('show');
       $modal.focus();
@@ -169,6 +167,7 @@
       $video.load();
 
       try {
+        console.log("Intentando reproducir video...");
         await $video.play();
 
         // Forzar fullscreen en el video
@@ -176,6 +175,7 @@
         else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
         else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
 
+        console.log("Fullscreen activado");
       } catch (e) {
         console.warn("Error al reproducir o fullscreen:", e);
       }
