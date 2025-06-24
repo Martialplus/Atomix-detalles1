@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
   <style>
+    /* igual que antes, para no repetir... */
     :root{
       --primario:#00aaff;
       --gris:#1b1b1b;
@@ -128,10 +129,14 @@
     if (!tituloParam) {
       $titulo.textContent = 'Película no encontrada';
       $play.style.display = 'none';
+      alert('No se ha recibido título');
     } else {
       db.collection('peliculas').where('titulo', '==', decodeURIComponent(tituloParam)).get()
         .then(snap => {
-          if (snap.empty) throw new Error('No existe');
+          if (snap.empty) {
+            alert('No se encontró la película');
+            throw new Error('No existe');
+          }
           const p = snap.docs[0].data();
           $titulo.textContent = p.titulo || 'Sin título';
           if (p.anio) $anio.textContent = `Año: ${p.anio}`;
@@ -139,51 +144,50 @@
           $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
           $hero.style.backgroundImage = `url(${p.imagen})`;
           videoURL = p.trailer || p.video || '';
-          console.log("Video URL cargado:", videoURL);
+          alert('Video URL cargado: ' + videoURL);
           if (!videoURL) $play.style.display = 'none';
         })
         .catch(e => {
           $titulo.textContent = 'Película no encontrada';
           $play.style.display = 'none';
-          console.error("Error al cargar datos:", e);
+          alert('Error al cargar datos');
         });
 
     }
 
-    // Crear Plyr solo una vez
     plyr = new Plyr($video, { autoplay: false });
 
     async function openPlayer() {
+      alert('Abrir reproductor');
       if (!videoURL) {
-        console.warn("No hay URL para el video");
+        alert("No hay URL para el video");
         return;
       }
 
       $modal.classList.add('show');
       $modal.focus();
 
-      // Cambiar fuente del video
       $video.src = videoURL;
       $video.load();
 
       try {
-        console.log("Intentando reproducir video...");
+        alert('Intentando reproducir video...');
         await $video.play();
 
-        // Forzar fullscreen en el video
         if ($video.requestFullscreen) await $video.requestFullscreen();
         else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
         else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
 
-        console.log("Fullscreen activado");
+        alert('Fullscreen activado');
       } catch (e) {
-        console.warn("Error al reproducir o fullscreen:", e);
+        alert("Error al reproducir o fullscreen: " + e.message);
       }
     }
 
     $play.addEventListener('click', openPlayer);
 
     async function cerrarModal() {
+      alert('Cerrar reproductor');
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
