@@ -155,46 +155,33 @@
 
     }
 
-    $play.addEventListener('click', async () => {
+    // Crear Plyr solo una vez
+    plyr = new Plyr($video, { autoplay: false });
+
+    async function openPlayer() {
       if (!videoURL) return;
 
-      console.log('Abrir modal con video:', videoURL);
-
-      $video.setAttribute('src', videoURL);
-      $video.setAttribute('playsinline', true);
       $modal.classList.add('show');
       $modal.focus();
 
-      if (plyr) {
-        plyr.destroy();
-        plyr = null;
-      }
-
-      // Esperar a que el video esté listo
-      await new Promise((resolve, reject) => {
-        if ($video.readyState >= 3) resolve();
-        else {
-          $video.addEventListener('canplay', resolve, { once: true });
-          $video.addEventListener('error', e => {
-            console.error('Error cargando video', e);
-            reject(e);
-          }, { once: true });
-        }
-      });
-
-      plyr = new Plyr($video, { autoplay: true });
+      // Cambiar fuente del video
+      $video.src = videoURL;
+      $video.load();
 
       try {
         await $video.play();
 
+        // Forzar fullscreen en el video
         if ($video.requestFullscreen) await $video.requestFullscreen();
         else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
         else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
 
       } catch (e) {
-        console.warn("Error en reproducción o fullscreen:", e.message);
+        console.warn("Error al reproducir o fullscreen:", e);
       }
-    });
+    }
+
+    $play.addEventListener('click', openPlayer);
 
     async function cerrarModal() {
       if (document.fullscreenElement) {
@@ -204,15 +191,9 @@
       $video.pause();
       $video.removeAttribute('src');
       $video.load();
-
-      if (plyr) {
-        plyr.destroy();
-        plyr = null;
-      }
     }
 
     $closeBtn.addEventListener('click', cerrarModal);
-
     $video.addEventListener('ended', cerrarModal);
 
     document.addEventListener('keydown', (e) => {
