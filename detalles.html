@@ -41,7 +41,7 @@
     .meta .rating{background:var(--gris);padding:4px 16px;border-radius:14px;color:var(--primario);font-weight:600}
     .sinopsis{max-width:90vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
 
-    /* Modal con div en lugar de dialog */
+    /* Modal con div */
     #modalPlayer {
       display: none;
       position: fixed;
@@ -105,14 +105,12 @@
     <p id="sinopsis" class="sinopsis"></p>
   </section>
 
-  <!-- Modal reemplazando dialog -->
   <div id="modalPlayer" aria-modal="true" role="dialog" tabindex="-1">
     <button id="closeBtn" aria-label="Cerrar reproductor">Cerrar ✕</button>
     <video id="player" playsinline controls></video>
   </div>
 
   <script>
-    /* -------- Firebase ---------- */
     firebase.initializeApp({
       apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
       authDomain: "atomix-54e1a.firebaseapp.com",
@@ -157,9 +155,10 @@
 
     }
 
-    /* -------- Abrir player -------- */
     $play.addEventListener('click', async () => {
       if (!videoURL) return;
+
+      console.log('Abrir modal con video:', videoURL);
 
       $video.setAttribute('src', videoURL);
       $video.setAttribute('playsinline', true);
@@ -171,17 +170,21 @@
         plyr = null;
       }
 
+      // Esperar a que el video esté listo
+      await new Promise((resolve, reject) => {
+        if ($video.readyState >= 3) resolve();
+        else {
+          $video.addEventListener('canplay', resolve, { once: true });
+          $video.addEventListener('error', e => {
+            console.error('Error cargando video', e);
+            reject(e);
+          }, { once: true });
+        }
+      });
+
       plyr = new Plyr($video, { autoplay: true });
 
       try {
-        await new Promise((resolve, reject) => {
-          if ($video.readyState >= 3) resolve();
-          else {
-            $video.addEventListener('canplay', resolve, { once: true });
-            $video.addEventListener('error', reject, { once: true });
-          }
-        });
-
         await $video.play();
 
         if ($video.requestFullscreen) await $video.requestFullscreen();
@@ -189,13 +192,14 @@
         else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
 
       } catch (e) {
-        console.warn("Error al reproducir o fullscreen:", e.message);
+        console.warn("Error en reproducción o fullscreen:", e.message);
       }
     });
 
-    /* -------- Cerrar modal -------- */
-    function cerrarModal() {
-      if (document.fullscreenElement) await document.exitFullscreen?.();
+    async function cerrarModal() {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
       $modal.classList.remove('show');
       $video.pause();
       $video.removeAttribute('src');
@@ -211,7 +215,6 @@
 
     $video.addEventListener('ended', cerrarModal);
 
-    /* -------- Control con teclado -------- */
     document.addEventListener('keydown', (e) => {
       if (!$modal.classList.contains('show')) return;
 
