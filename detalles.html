@@ -123,115 +123,123 @@
     <video id="player" class="plyr" controls playsinline></video>
   </dialog>
 
-  <script>
-    // Firebase config
-    firebase.initializeApp({
-      apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
-      authDomain: "atomix-54e1a.firebaseapp.com",
-      projectId: "atomix-54e1a"
-    });
-    const db = firebase.firestore();
+<script>
+  // Inicializar Firebase
+  firebase.initializeApp({
+    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+    authDomain: "atomix-54e1a.firebaseapp.com",
+    projectId: "atomix-54e1a"
+  });
+  const db = firebase.firestore();
 
-    const $hero = document.getElementById('hero');
-    const $play = document.getElementById('playBtn');
-    const $modal = document.getElementById('modalPlayer');
-    const $video = document.getElementById('player');
-    const $titulo = document.getElementById('titulo');
-    const $anio = document.getElementById('anio');
-    const $punt = document.getElementById('puntuacion');
-    const $sin = document.getElementById('sinopsis');
+  // Elementos del DOM
+  const $hero = document.getElementById('hero');
+  const $play = document.getElementById('playBtn');
+  const $modal = document.getElementById('modalPlayer');
+  const $video = document.getElementById('player');
+  const $titulo = document.getElementById('titulo');
+  const $anio = document.getElementById('anio');
+  const $punt = document.getElementById('puntuacion');
+  const $sin = document.getElementById('sinopsis');
 
-    let videoURL = '';
-    let plyr = null;
+  let videoURL = '';
+  let plyr = null;
 
-    const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
+  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
-    if (!tituloParam) {
-      $titulo.textContent = 'Película no encontrada';
-      $play.style.display = 'none';
-    } else {
-      db.collection('peliculas')
-        .where('titulo', '==', decodeURIComponent(tituloParam))
-        .get()
-        .then(snap => {
-          if (snap.empty) throw new Error('No existe la película');
-          const p = snap.docs[0].data();
+  if (!tituloParam) {
+    $titulo.textContent = 'Película no encontrada';
+    $play.style.display = 'none';
+  } else {
+    db.collection('peliculas')
+      .where('titulo', '==', decodeURIComponent(tituloParam))
+      .get()
+      .then(snap => {
+        if (snap.empty) throw new Error('No existe la película');
+        const p = snap.docs[0].data();
+        $titulo.textContent = p.titulo || 'Sin título';
+        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
+        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
+        videoURL = p.trailer || p.video || '';
+        if (!videoURL) $play.style.display = 'none';
+      })
+      .catch(() => {
+        $titulo.textContent = 'Película no encontrada';
+        $play.style.display = 'none';
+      });
+  }
 
-          $titulo.textContent = p.titulo || 'Sin título';
-          $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
-          $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
-          $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-          $hero.style.backgroundImage = `url(${p.imagen || ''})`;
-          videoURL = p.trailer || p.video || '';
+  async function openModal() {
+    if (!videoURL) return;
 
-          if (!videoURL) $play.style.display = 'none';
-        })
-        .catch(() => {
-          $titulo.textContent = 'Película no encontrada';
-          $play.style.display = 'none';
-        });
+    // Detener y destruir reproductor si existe
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
     }
 
-    async function openModal() {
-      if (!videoURL) return;
+    // Limpiar y preparar video
+    $video.pause();
+    $video.removeAttribute('src');
+    $video.load();
+    $video.src = videoURL;
+    $video.style.display = 'block';
 
-      // Limpieza previa
-      if (plyr) { plyr.destroy(); plyr = null; }
+    $modal.showModal();
+
+    // Crear UNA sola instancia de Plyr
+    plyr = new Plyr($video, {
+      autoplay: true
+    });
+
+    try {
+      await $video.play();
+
+      // Pantalla completa
+      if ($modal.requestFullscreen) await $modal.requestFullscreen();
+      else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
+      else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
+
+    } catch (e) {
+      console.warn('No se pudo reproducir automáticamente:', e.message);
+    }
+  }
+
+  async function closeModal() {
+    try {
+      // Detener video y salir de fullscreen
+      $video.pause();
+      if (document.fullscreenElement) await document.exitFullscreen();
+
+      // Eliminar Plyr si existe
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
+      }
+
+      // Reset del video
       $video.removeAttribute('src');
       $video.load();
-      $video.src = videoURL;
-      $video.style.display = 'block';
-
-      // Mostrar modal
-      $modal.showModal();
-
-      // Iniciar Plyr
-      plyr = new Plyr($video, { autoplay: true });
-
-      try {
-        await $video.play();
-
-        // Pantalla completa
-        if ($modal.requestFullscreen) await $modal.requestFullscreen();
-        else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
-        else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
-      } catch (e) {
-        console.warn('No se pudo reproducir automáticamente:', e.message);
-      }
+      $modal.close();
+    } catch (err) {
+      console.error('Error al cerrar modal:', err);
     }
+  }
 
-    async function closeModal() {
-      try {
-        $video.pause();
+  // Eventos
+  $play.addEventListener('click', openModal);
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
 
-        if (document.fullscreenElement) await document.exitFullscreen();
+  // Teclas
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.open) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') closeModal();
+  });
+</script>
 
-        if (plyr) {
-          plyr.destroy();
-          plyr = null;
-        }
-
-        $video.removeAttribute('src');
-        $video.load();
-
-        $modal.close();
-        $video.style.display = 'none';
-        setTimeout(() => $video.style.display = '', 300);
-
-      } catch (err) {
-        console.error('Error al cerrar modal:', err);
-      }
-    }
-
-    $play.addEventListener('click', openModal);
-    document.getElementById('closeBtn').addEventListener('click', closeModal);
-    $video.addEventListener('ended', closeModal);
-
-    document.addEventListener('keydown', (e) => {
-      if (!$modal.open) return;
-      if (e.key === 'Escape' || e.key === 'Backspace') closeModal();
-    });
-  </script>
 
 </body>
 </html>
