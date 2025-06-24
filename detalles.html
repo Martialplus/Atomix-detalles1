@@ -9,221 +9,81 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Player library -->
+  <!-- Plyr -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
-<style>
-  :root {
-    --primario: #00aaff;
-    --gris: #1b1b1b;
-  }
+  <style>
+    :root{
+      --primario:#00aaff;
+      --gris:#1b1b1b;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;background:#000;color:#fff;overflow-x:hidden}
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+    .btn-back{position:fixed;top:24px;left:24px;z-index:100;width:48px;height:48px;
+      display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(6px);cursor:pointer;transition:.25s}
+    .btn-back:hover{background:var(--primario);transform:scale(1.05)}
+    .btn-back svg{width:24px;height:24px;fill:#fff}
 
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #000;
-    color: #fff;
-    overflow-x: hidden;
-  }
+    .hero{width:100%;height:60vh;min-height:360px;background:center/cover #222 no-repeat;position:relative}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 15%,rgba(0,0,0,0) 60%)}
+    .btn-play{position:absolute;inset:0;margin:auto;width:96px;height:96px;border:none;border-radius:50%;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;
+      transition:background .25s,transform .25s;z-index:10}
+    .btn-play svg{width:42px;height:42px;fill:#fff;margin-left:4px}
+    .btn-play:hover{background:var(--primario);transform:scale(1.1)}
 
-  .btn-back {
-    position: fixed;
-    top: 24px;
-    left: 24px;
-    z-index: 100;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    transition: 0.25s;
-  }
+    .info{width:100%;padding:40px 6vw;max-width:1600px;margin:auto;display:flex;flex-direction:column;gap:24px}
+    .titulo{font-size:3.5vw;min-font-size:32px;font-weight:700;line-height:1.2}
+    .meta{display:flex;gap:28px;font-size:1.2vw;min-font-size:15px;color:#aaa}
+    .meta .rating{background:var(--gris);padding:4px 16px;border-radius:14px;color:var(--primario);font-weight:600}
+    .sinopsis{max-width:90vw;font-size:1.1vw;min-font-size:15px;line-height:1.6}
 
-  .btn-back:hover {
-    background: var(--primario);
-    transform: scale(1.05);
-  }
-
-  .btn-back svg {
-    width: 24px;
-    height: 24px;
-    fill: #fff;
-  }
-
-  .hero {
-    width: 100%;
-    height: 60vh;
-    min-height: 360px;
-    background: center/cover #222 no-repeat;
-    position: relative;
-  }
-
-  .hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 15%, rgba(0, 0, 0, 0) 60%);
-  }
-
-  .btn-play {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 96px;
-    height: 96px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.25s, transform 0.25s;
-    z-index: 10;
-  }
-
-  .btn-play svg {
-    width: 42px;
-    height: 42px;
-    fill: #fff;
-    margin-left: 4px;
-  }
-
-  .btn-play:hover {
-    background: var(--primario);
-    transform: scale(1.1);
-  }
-
-  .info {
-    width: 100%;
-    padding: 40px 6vw;
-    max-width: 1600px;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .titulo {
-    font-size: 3.5vw;
-    min-font-size: 32px;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .meta {
-    display: flex;
-    gap: 28px;
-    font-size: 1.2vw;
-    min-font-size: 15px;
-    color: #aaa;
-  }
-
-  .meta .rating {
-    background: var(--gris);
-    padding: 4px 16px;
-    border-radius: 14px;
-    color: var(--primario);
-    font-weight: 600;
-  }
-
-  .sinopsis {
-    max-width: 90vw;
-    font-size: 1.1vw;
-    min-font-size: 15px;
-    line-height: 1.6;
-  }
-
-  dialog#modalPlayer {
-    width: 100vw;
-    height: 100vh;
-    border: none;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.92);
-  }
-
-  dialog::backdrop {
-    background: rgba(0, 0, 0, 0.85);
-  }
-
-  .plyr,
-  #player {
-    height: 100%;
-    width: 100%;
-    background: #000;
-    max-height: 100vh;
-    max-width: 100vw;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 20px;
-    right: 28px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    z-index: 20;
-  }
-
-  .modal-close svg {
-    width: 28px;
-    height: 28px;
-    fill: #fff;
-    transition: transform 0.25s;
-  }
-
-  .modal-close:hover svg {
-    transform: rotate(90deg);
-  }
-
-  /* Pantalla completa forzada */
-  dialog#modalPlayer:fullscreen,
-  dialog#modalPlayer:-webkit-full-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-  }
-
-  .plyr:fullscreen video,
-  .plyr:-webkit-full-screen video,
-  video:-webkit-full-screen {
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-
-  @media (max-width: 900px) {
-    .titulo {
-      font-size: 28px;
+    /* Modal con div en lugar de dialog */
+    #modalPlayer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #modalPlayer.show {
+      display: flex;
+    }
+    #player {
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10100;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      color: white;
+      font-size: 18px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #closeBtn:hover {
+      background: var(--primario);
     }
 
-    .meta {
-      font-size: 14px;
+    @media(max-width:900px){
+      .titulo{font-size:28px}
+      .meta{font-size:14px}
+      .sinopsis{font-size:15px}
     }
-
-    .sinopsis {
-      font-size: 15px;
-    }
-  }
-</style>
-
-
+  </style>
 </head>
 <body>
   <button class="btn-back" onclick="history.back()" aria-label="Volver">
@@ -245,144 +105,135 @@
     <p id="sinopsis" class="sinopsis"></p>
   </section>
 
-  <!-- Modal Player -->
-  <dialog id="modalPlayer">
-    <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal()">
-      <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
-    </button>
-    <video id="player" class="plyr" controls playsinline></video>
-  </dialog>
+  <!-- Modal reemplazando dialog -->
+  <div id="modalPlayer" aria-modal="true" role="dialog" tabindex="-1">
+    <button id="closeBtn" aria-label="Cerrar reproductor">Cerrar ✕</button>
+    <video id="player" playsinline controls></video>
+  </div>
 
-<script>
-  /* -------- Firebase ---------- */
-  firebase.initializeApp({
-    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
-    authDomain: "atomix-54e1a.firebaseapp.com",
-    projectId: "atomix-54e1a"
-  });
-  const db = firebase.firestore();
+  <script>
+    /* -------- Firebase ---------- */
+    firebase.initializeApp({
+      apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+      authDomain: "atomix-54e1a.firebaseapp.com",
+      projectId: "atomix-54e1a"
+    });
+    const db = firebase.firestore();
 
-  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
-  const $hero = document.getElementById('hero');
-  const $play = document.getElementById('playBtn');
-  const $modal = document.getElementById('modalPlayer');
-  const $video = document.getElementById('player');
-  const $titulo = document.getElementById('titulo');
-  const $anio = document.getElementById('anio');
-  const $punt = document.getElementById('puntuacion');
-  const $sin = document.getElementById('sinopsis');
+    const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
+    const $hero = document.getElementById('hero');
+    const $play = document.getElementById('playBtn');
+    const $modal = document.getElementById('modalPlayer');
+    const $video = document.getElementById('player');
+    const $titulo = document.getElementById('titulo');
+    const $anio = document.getElementById('anio');
+    const $punt = document.getElementById('puntuacion');
+    const $sin = document.getElementById('sinopsis');
+    const $closeBtn = document.getElementById('closeBtn');
 
-  let videoURL = '';
-  let plyr = null;
+    let videoURL = '';
+    let plyr = null;
 
-  if (!tituloParam) {
-    $titulo.textContent = 'Película no encontrada';
-    $play.style.display = 'none';
-  } else {
-    db.collection('peliculas').where('titulo', '==', decodeURIComponent(tituloParam)).get()
-      .then(snap => {
-        if (snap.empty) throw new Error('No existe');
-        const p = snap.docs[0].data();
-        $titulo.textContent = p.titulo || 'Sin título';
-        if (p.anio) $anio.textContent = `Año: ${p.anio}`;
-        if (p.puntuacion) $punt.textContent = `⭐ ${p.puntuacion}/10`;
-        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen})`;
-        videoURL = p.trailer || p.video || '';
-        if (!videoURL) $play.style.display = 'none';
-      })
-      .catch(e => {
-        $titulo.textContent = 'Película no encontrada';
-        $play.style.display = 'none';
-      });
-  }
+    if (!tituloParam) {
+      $titulo.textContent = 'Película no encontrada';
+      $play.style.display = 'none';
+    } else {
+      db.collection('peliculas').where('titulo', '==', decodeURIComponent(tituloParam)).get()
+        .then(snap => {
+          if (snap.empty) throw new Error('No existe');
+          const p = snap.docs[0].data();
+          $titulo.textContent = p.titulo || 'Sin título';
+          if (p.anio) $anio.textContent = `Año: ${p.anio}`;
+          if (p.puntuacion) $punt.textContent = `⭐ ${p.puntuacion}/10`;
+          $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+          $hero.style.backgroundImage = `url(${p.imagen})`;
+          videoURL = p.trailer || p.video || '';
+          if (!videoURL) $play.style.display = 'none';
+        })
+        .catch(e => {
+          $titulo.textContent = 'Película no encontrada';
+          $play.style.display = 'none';
+        });
 
-  /* -------- Abrir player -------- */
-  $play.addEventListener('click', async () => {
-    if (!videoURL) return;
-
-    $video.setAttribute('src', videoURL);
-    $video.setAttribute('playsinline', true);
-
-    $modal.showModal();
-
-    // Destruye instancia previa de Plyr para evitar conflictos
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
     }
 
-    plyr = new Plyr($video, { autoplay: true });
+    /* -------- Abrir player -------- */
+    $play.addEventListener('click', async () => {
+      if (!videoURL) return;
 
-    try {
-      // Espera a que el video esté listo para reproducir
-      await new Promise((resolve, reject) => {
-        if ($video.readyState >= 3) {
-          resolve();
-        } else {
-          $video.addEventListener('canplay', resolve, { once: true });
-          $video.addEventListener('error', reject, { once: true });
-        }
-      });
+      $video.setAttribute('src', videoURL);
+      $video.setAttribute('playsinline', true);
+      $modal.classList.add('show');
+      $modal.focus();
 
-      await $video.play();
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
+      }
 
-      // Pantalla completa directa en el video
-      if ($video.requestFullscreen) await $video.requestFullscreen();
-      else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
-      else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
+      plyr = new Plyr($video, { autoplay: true });
 
-    } catch (e) {
-      console.warn("Error al reproducir o fullscreen:", e.message);
+      try {
+        await new Promise((resolve, reject) => {
+          if ($video.readyState >= 3) resolve();
+          else {
+            $video.addEventListener('canplay', resolve, { once: true });
+            $video.addEventListener('error', reject, { once: true });
+          }
+        });
+
+        await $video.play();
+
+        if ($video.requestFullscreen) await $video.requestFullscreen();
+        else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
+        else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
+
+      } catch (e) {
+        console.warn("Error al reproducir o fullscreen:", e.message);
+      }
+    });
+
+    /* -------- Cerrar modal -------- */
+    function cerrarModal() {
+      if (document.fullscreenElement) await document.exitFullscreen?.();
+      $modal.classList.remove('show');
+      $video.pause();
+      $video.removeAttribute('src');
+      $video.load();
+
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
+      }
     }
-  });
 
-  /* -------- Cerrar modal -------- */
-  function cerrarModal() {
-    if (document.fullscreenElement) document.exitFullscreen();
-    $modal.close();
-    $video.pause();
+    $closeBtn.addEventListener('click', cerrarModal);
 
-    $video.removeAttribute('src');
-    $video.load();
+    $video.addEventListener('ended', cerrarModal);
 
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-  }
+    /* -------- Control con teclado -------- */
+    document.addEventListener('keydown', (e) => {
+      if (!$modal.classList.contains('show')) return;
 
-  // Botón cerrar
-  document.querySelector('.modal-close').addEventListener('click', cerrarModal);
-
-  // Al terminar el video
-  $video.addEventListener('ended', cerrarModal);
-
-  // Control con teclado
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.open) return;
-
-    switch (e.key) {
-      case 'ArrowLeft':
-        $video.currentTime -= 10;
-        break;
-      case 'ArrowRight':
-        $video.currentTime += 10;
-        break;
-      case ' ':
-      case 'Enter':
-        e.preventDefault();
-        if ($video.paused) $video.play();
-        else $video.pause();
-        break;
-      case 'Escape':
-      case 'Backspace':
-        cerrarModal();
-        break;
-    }
-  });
-</script>
-
-
+      switch (e.key) {
+        case 'ArrowLeft':
+          $video.currentTime -= 10;
+          break;
+        case 'ArrowRight':
+          $video.currentTime += 10;
+          break;
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          if ($video.paused) $video.play();
+          else $video.pause();
+          break;
+        case 'Escape':
+        case 'Backspace':
+          cerrarModal();
+          break;
+      }
+    });
+  </script>
 </body>
 </html>
