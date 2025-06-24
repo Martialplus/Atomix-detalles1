@@ -151,13 +151,6 @@
     if (document.fullscreenElement) document.exitFullscreen();
   }
 
-  // Cierre automático al pausar o terminar
-  $video.addEventListener('pause', () => {
-    setTimeout(() => {
-      if ($video.paused && !$video.ended) cerrarModal();
-    }, 500);
-  });
-
   $video.addEventListener('ended', cerrarModal);
 
   /* -------- Teclado -------- */
