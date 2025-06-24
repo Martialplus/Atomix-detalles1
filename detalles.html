@@ -9,6 +9,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+  <!-- Plyr CSS y JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
+
   <style>
     :root{
       --primario:#00aaff;
@@ -51,11 +55,14 @@
     #modalPlayer.show {
       display: flex;
     }
-    #player {
-      width: 100vw;
-      height: 100vh;
+
+    /* Plyr styling override */
+    .plyr {
+      width: 100vw !important;
+      height: 100vh !important;
       background: #000;
     }
+
     #closeBtn {
       position: absolute;
       top: 20px;
@@ -71,23 +78,6 @@
       transition: background 0.3s ease;
     }
     #closeBtn:hover {
-      background: var(--primario);
-    }
-    #unmuteBtn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 10100;
-      background: rgba(0,0,0,0.5);
-      border: none;
-      color: white;
-      font-size: 18px;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    #unmuteBtn:hover {
       background: var(--primario);
     }
   </style>
@@ -112,10 +102,9 @@
     <p id="sinopsis" class="sinopsis"></p>
   </section>
 
-  <div id="modalPlayer" aria-modal="true" role="dialog" tabindex="-1">
+  <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
     <button id="closeBtn" aria-label="Cerrar reproductor">Cerrar ✕</button>
-    <video id="player" playsinline controls muted></video>
-    <button id="unmuteBtn" aria-label="Activar sonido">🔊 Sonido</button>
+    <video id="player" playsinline></video>
   </div>
 
   <script>
@@ -136,9 +125,9 @@
     const $punt = document.getElementById('puntuacion');
     const $sin = document.getElementById('sinopsis');
     const $closeBtn = document.getElementById('closeBtn');
-    const $unmuteBtn = document.getElementById('unmuteBtn');
 
     let videoURL = '';
+    let plyr = null;
 
     if (!tituloParam) {
       $titulo.textContent = 'Película no encontrada';
@@ -160,60 +149,65 @@
           $titulo.textContent = 'Película no encontrada';
           $play.style.display = 'none';
         });
+
     }
 
-    async function openPlayer() {
+    function openPlayer() {
       if (!videoURL) return;
 
       $modal.classList.add('show');
-      $modal.focus();
+
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
+      }
 
       $video.src = videoURL;
-      $video.muted = true;  // mutear para evitar bloqueo autoplay
-      $video.load();
 
-      try {
-        await $video.play();
+      plyr = new Plyr($video, {
+        autoplay: true,
+        controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
+        fullscreen: { enabled: true, fallback: true, iosNative: true },
+      });
 
-        // pantalla completa en modal
-        if ($modal.requestFullscreen) await $modal.requestFullscreen();
-        else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
-        else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
-      } catch (e) {
-        console.warn("Error al reproducir o fullscreen:", e.message);
+      // Intenta fullscreen en modal para que ocupe toda la pantalla
+      if ($modal.requestFullscreen) {
+        $modal.requestFullscreen().catch(() => {});
+      } else if ($modal.webkitRequestFullscreen) {
+        $modal.webkitRequestFullscreen();
+      } else if ($modal.msRequestFullscreen) {
+        $modal.msRequestFullscreen();
       }
     }
 
-    async function cerrarModal() {
+    async function closePlayer() {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
+      }
+      if (plyr) {
+        plyr.destroy();
+        plyr = null;
       }
       $modal.classList.remove('show');
       $video.pause();
       $video.removeAttribute('src');
       $video.load();
-      $video.muted = true; // asegurar mute para siguiente reproducción
     }
 
     $play.addEventListener('click', openPlayer);
-    $closeBtn.addEventListener('click', cerrarModal);
-    $video.addEventListener('ended', cerrarModal);
+    $closeBtn.addEventListener('click', closePlayer);
 
-    $unmuteBtn.addEventListener('click', () => {
-      $video.muted = false;
-      $video.volume = 1;
-      $unmuteBtn.style.display = 'none'; // oculta botón tras activarlo
-    });
+    // Cerrar al terminar video
+    $video.addEventListener('ended', closePlayer);
 
+    // Control teclado para modal abierto
     document.addEventListener('keydown', (e) => {
       if (!$modal.classList.contains('show')) return;
 
       switch (e.key) {
-        case 'ArrowLeft':
-          $video.currentTime -= 10;
-          break;
-        case 'ArrowRight':
-          $video.currentTime += 10;
+        case 'Escape':
+        case 'Backspace':
+          closePlayer();
           break;
         case ' ':
         case 'Enter':
@@ -221,9 +215,11 @@
           if ($video.paused) $video.play();
           else $video.pause();
           break;
-        case 'Escape':
-        case 'Backspace':
-          cerrarModal();
+        case 'ArrowLeft':
+          $video.currentTime -= 10;
+          break;
+        case 'ArrowRight':
+          $video.currentTime += 10;
           break;
       }
     });
