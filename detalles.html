@@ -249,6 +249,7 @@
   const $sin = document.getElementById('sinopsis');
 
   let videoURL = '';
+  let plyr = null;
 
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
@@ -282,18 +283,18 @@
       });
   }
 
-  let plyr = null;
-
   async function openModal() {
     if (!videoURL) return;
 
     $modal.classList.add('show');
     $video.src = videoURL;
 
+    // Destruye Plyr anterior si existía
     if (plyr) {
       plyr.destroy();
     }
 
+    // Inicializa nuevo reproductor
     plyr = new Plyr($video, {
       autoplay: true,
       controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
@@ -317,8 +318,18 @@
 
   async function closeModal() {
     try {
-      // Pausar el video
-      $video.pause();
+      // Pausar el video inmediatamente
+      if (!$video.paused) {
+        $video.pause();
+      }
+
+      // Salir de fullscreen si está activo
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+
+      // Ocultar modal
+      $modal.classList.remove('show');
 
       // Destruir Plyr
       if (plyr) {
@@ -326,27 +337,24 @@
         plyr = null;
       }
 
-      // Limpiar el src para que deje de sonar y cargar video
+      // Limpiar src y reiniciar
       $video.removeAttribute('src');
       $video.load();
-
-      // Salir de pantalla completa si está activo
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-
-      // Ocultar modal
-      $modal.classList.remove('show');
-
     } catch (error) {
-      console.error('Error cerrando modal:', error);
+      console.error('Error al cerrar modal:', error);
     }
   }
 
+  // Botón de reproducción
   $play.addEventListener('click', openModal);
+
+  // Botón cerrar (asegúrate de tener este botón en tu HTML con id="closeBtn")
   document.getElementById('closeBtn').addEventListener('click', closeModal);
+
+  // Cierra al terminar el video
   $video.addEventListener('ended', closeModal);
 
+  // Cerrar con tecla Escape o Backspace
   document.addEventListener('keydown', (e) => {
     if (!$modal.classList.contains('show')) return;
     if (e.key === 'Escape' || e.key === 'Backspace') {
