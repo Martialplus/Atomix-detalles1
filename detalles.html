@@ -230,7 +230,7 @@
   </div>
 
 <script>
-  // Firebase config + inicialización
+  // Configuración de Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
     authDomain: "atomix-54e1a.firebaseapp.com",
@@ -239,6 +239,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  // Referencias DOM
   const $hero = document.getElementById('hero');
   const $play = document.getElementById('playBtn');
   const $modal = document.getElementById('modalPlayer');
@@ -251,6 +252,7 @@
   let videoURL = '';
   let plyr = null;
 
+  // Obtener parámetro del título desde la URL
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
   if (!tituloParam) {
@@ -283,18 +285,23 @@
       });
   }
 
+  // Función para abrir el modal y reproducir el video
   async function openModal() {
     if (!videoURL) return;
 
     $modal.classList.add('show');
-    $video.src = videoURL;
 
-    // Destruye Plyr anterior si existía
+    // Limpiar reproductor previo si existe
     if (plyr) {
       plyr.destroy();
+      plyr = null;
     }
 
-    // Inicializa nuevo reproductor
+    $video.removeAttribute('src');
+    $video.load();
+    $video.src = videoURL;
+
+    // Crear nueva instancia de Plyr
     plyr = new Plyr($video, {
       autoplay: true,
       controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
@@ -303,7 +310,7 @@
     try {
       await $video.play();
 
-      // Pedir fullscreen en el modal para que el video ocupe toda la pantalla
+      // Abrir en pantalla completa
       if ($modal.requestFullscreen) {
         await $modal.requestFullscreen();
       } else if ($modal.webkitRequestFullscreen) {
@@ -311,50 +318,49 @@
       } else if ($modal.msRequestFullscreen) {
         await $modal.msRequestFullscreen();
       }
+
     } catch (e) {
-      console.warn('Error fullscreen/autoplay:', e);
+      console.warn('Error al reproducir en fullscreen:', e);
     }
   }
 
+  // Función para cerrar el modal y detener todo
   async function closeModal() {
     try {
-      // Pausar el video inmediatamente
-      if (!$video.paused) {
-        $video.pause();
-      }
+      // Pausar inmediatamente
+      $video.pause();
 
-      // Salir de fullscreen si está activo
-      if (document.fullscreenElement && document.exitFullscreen) {
+      // Quitar fuente y reiniciar
+      $video.removeAttribute('src');
+      $video.load();
+
+      // Salir de fullscreen
+      if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
 
       // Ocultar modal
       $modal.classList.remove('show');
 
-      // Destruir Plyr
-      if (plyr) {
-        plyr.destroy();
-        plyr = null;
-      }
+      // Esperar un poco y destruir Plyr correctamente
+      setTimeout(() => {
+        if (plyr) {
+          plyr.destroy();
+          plyr = null;
+        }
+      }, 300);
 
-      // Limpiar src y reiniciar
-      $video.removeAttribute('src');
-      $video.load();
     } catch (error) {
       console.error('Error al cerrar modal:', error);
     }
   }
 
-  // Botón de reproducción
+  // Eventos
   $play.addEventListener('click', openModal);
-
-  // Botón cerrar (asegúrate de tener este botón en tu HTML con id="closeBtn")
   document.getElementById('closeBtn').addEventListener('click', closeModal);
-
-  // Cierra al terminar el video
   $video.addEventListener('ended', closeModal);
 
-  // Cerrar con tecla Escape o Backspace
+  // Teclado: cerrar con ESC o BACK
   document.addEventListener('keydown', (e) => {
     if (!$modal.classList.contains('show')) return;
     if (e.key === 'Escape' || e.key === 'Backspace') {
@@ -362,6 +368,7 @@
     }
   });
 </script>
+
 
 
 </body>
