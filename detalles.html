@@ -14,84 +14,71 @@
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
 
   <style>
-    :root {
-      --primario: #00aaff;
-      --gris: #1b1b1b;
-    }
-    * {margin: 0; padding: 0; box-sizing: border-box;}
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #000;
-      color: #fff;
-      overflow-x: hidden;
-    }
+    :root { --primario:#00aaff; --gris:#1b1b1b; }
+    * { margin:0; padding:0; box-sizing:border-box }
+    body { font-family:Arial,Helvetica,sans-serif; background:#000; color:#fff; overflow-x:hidden }
 
     .btn-back {
-      position: fixed; top: 24px; left: 24px; z-index: 100;
-      width: 48px; height: 48px;
-      display: flex; align-items: center; justify-content: center;
-      border: none; border-radius: 50%;
-      background: rgba(0, 0, 0, .55); backdrop-filter: blur(6px);
-      cursor: pointer; transition: .25s;
+      position:fixed; top:24px; left:24px; z-index:100;
+      width:48px; height:48px;
+      display:flex; align-items:center; justify-content:center;
+      border:none; border-radius:50%;
+      background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+      cursor:pointer; transition:.25s
     }
-    .btn-back:hover {
-      background: var(--primario);
-      transform: scale(1.05);
-    }
-    .btn-back svg { width: 24px; height: 24px; fill: #fff; }
+    .btn-back:hover { background:var(--primario); transform:scale(1.05) }
+    .btn-back svg { width:24px; height:24px; fill:#fff }
 
     .hero {
-      width: 100%; height: 60vh; min-height: 360px;
-      background: center/cover #222 no-repeat;
-      position: relative;
+      width:100%; height:60vh; min-height:360px;
+      background:center/cover #222 no-repeat; position:relative
     }
     .hero::after {
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, .85) 15%, rgba(0, 0, 0, 0) 60%);
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,.85) 15%,rgba(0,0,0,0) 60%)
     }
     .btn-play {
-      position: absolute; inset: 0; margin: auto;
-      width: 96px; height: 96px; border: none; border-radius: 50%;
-      background: rgba(0, 0, 0, .55); backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: .25s;
-      z-index: 10;
+      position:absolute; inset:0; margin:auto;
+      width:96px; height:96px;
+      border:none; border-radius:50%;
+      background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:.25s; z-index:10
     }
-    .btn-play svg { width: 42px; height: 42px; fill: #fff; margin-left: 4px; }
-    .btn-play:hover { background: var(--primario); transform: scale(1.1); }
+    .btn-play svg { width:42px; height:42px; fill:#fff; margin-left:4px }
+    .btn-play:hover { background:var(--primario); transform:scale(1.1) }
 
     .info {
-      width: 100%; padding: 40px 6vw; max-width: 1600px;
-      margin: auto; display: flex; flex-direction: column; gap: 24px;
+      width:100%; padding:40px 6vw; max-width:1600px; margin:auto;
+      display:flex; flex-direction:column; gap:24px
     }
-    .titulo { font-size: 3.5vw; font-weight: 700; line-height: 1.2; }
-    .meta { display: flex; gap: 28px; font-size: 1.2vw; color: #aaa; }
+    .titulo { font-size:3.5vw; font-weight:700; line-height:1.2 }
+    .meta { display:flex; gap:28px; font-size:1.2vw; color:#aaa }
     .meta .rating {
-      background: var(--gris); padding: 4px 16px; border-radius: 14px;
-      color: var(--primario); font-weight: 600;
+      background:var(--gris); padding:4px 16px; border-radius:14px;
+      color:var(--primario); font-weight:600
     }
-    .sinopsis { max-width: 90vw; font-size: 1.1vw; line-height: 1.6; }
+    .sinopsis { max-width:90vw; font-size:1.1vw; line-height:1.6 }
 
     dialog#modalPlayer {
-      width: 100vw; height: 100vh; border: none; padding: 0;
-      background: rgba(0, 0, 0, .92);
+      width:100vw; height:100vh; border:none; padding:0;
+      background:rgba(0,0,0,.92)
     }
-    dialog::backdrop { background: rgba(0, 0, 0, .85); }
-    .plyr { height: 100%; background: #000; }
+    dialog::backdrop { background:rgba(0,0,0,.85) }
+    .plyr { width:100%; height:100%; background:#000 }
     .modal-close {
-      position: absolute; top: 20px; right: 28px;
-      border: none; background: none; cursor: pointer; z-index: 20;
+      position:absolute; top:20px; right:28px;
+      border:none; background:none; cursor:pointer; z-index:20
     }
     .modal-close svg {
-      width: 28px; height: 28px; fill: #fff;
-      transition: transform .25s;
+      width:28px; height:28px; fill:#fff; transition:transform .25s
     }
-    .modal-close:hover svg { transform: rotate(90deg); }
+    .modal-close:hover svg { transform:rotate(90deg) }
 
-    @media(max-width: 900px) {
-      .titulo { font-size: 28px; }
-      .meta { font-size: 14px; }
-      .sinopsis { font-size: 15px; }
+    @media(max-width:900px) {
+      .titulo { font-size:28px }
+      .meta { font-size:14px }
+      .sinopsis { font-size:15px }
     }
   </style>
 </head>
@@ -116,6 +103,7 @@
     <p id="sinopsis" class="sinopsis"></p>
   </section>
 
+  <!-- Modal player -->
   <dialog id="modalPlayer">
     <button id="closeBtn" class="modal-close" aria-label="Cerrar">
       <svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12l6.29 6.29-1.42 1.42L10.59 13.41 4.3 19.71 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.59l6.29-6.3z"/></svg>
@@ -123,123 +111,42 @@
     <video id="player" class="plyr" controls playsinline></video>
   </dialog>
 
-<script>
-  // Inicializar Firebase
-  firebase.initializeApp({
-    apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
-    authDomain: "atomix-54e1a.firebaseapp.com",
-    projectId: "atomix-54e1a"
-  });
-  const db = firebase.firestore();
-
-  // Elementos del DOM
-  const $hero = document.getElementById('hero');
-  const $play = document.getElementById('playBtn');
-  const $modal = document.getElementById('modalPlayer');
-  const $video = document.getElementById('player');
-  const $titulo = document.getElementById('titulo');
-  const $anio = document.getElementById('anio');
-  const $punt = document.getElementById('puntuacion');
-  const $sin = document.getElementById('sinopsis');
-
-  let videoURL = '';
-  let plyr = null;
-
-  const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
-
-  if (!tituloParam) {
-    $titulo.textContent = 'Película no encontrada';
-    $play.style.display = 'none';
-  } else {
-    db.collection('peliculas')
-      .where('titulo', '==', decodeURIComponent(tituloParam))
-      .get()
-      .then(snap => {
-        if (snap.empty) throw new Error('No existe la película');
-        const p = snap.docs[0].data();
-        $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
-        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
-        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
-        videoURL = p.trailer || p.video || '';
-        if (!videoURL) $play.style.display = 'none';
-      })
-      .catch(() => {
-        $titulo.textContent = 'Película no encontrada';
-        $play.style.display = 'none';
-      });
-  }
-
-  async function openModal() {
-    if (!videoURL) return;
-
-    // Detener y destruir reproductor si existe
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
-    // Limpiar y preparar video
-    $video.pause();
-    $video.removeAttribute('src');
-    $video.load();
-    $video.src = videoURL;
-    $video.style.display = 'block';
-
-    $modal.showModal();
-
-    // Crear UNA sola instancia de Plyr
-    plyr = new Plyr($video, {
-      autoplay: true
+  <script>
+    // Firebase
+    firebase.initializeApp({
+      apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
+      authDomain: "atomix-54e1a.firebaseapp.com",
+      projectId: "atomix-54e1a"
     });
+    const db = firebase.firestore();
 
-    try {
-      await $video.play();
+    const $hero = document.getElementById('hero');
+    const $play = document.getElementById('playBtn');
+    const $modal = document.getElementById('modalPlayer');
+    const $video = document.getElementById('player');
+    const $titulo = document.getElementById('titulo');
+    const $anio = document.getElementById('anio');
+    const $punt = document.getElementById('puntuacion');
+    const $sin = document.getElementById('sinopsis');
 
-      // Pantalla completa
-      if ($modal.requestFullscreen) await $modal.requestFullscreen();
-      else if ($modal.webkitRequestFullscreen) await $modal.webkitRequestFullscreen();
-      else if ($modal.msRequestFullscreen) await $modal.msRequestFullscreen();
+    let videoURL = '';
+    let plyr = new Plyr($video);
 
-    } catch (e) {
-      console.warn('No se pudo reproducir automáticamente:', e.message);
-    }
-  }
+    const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
-  async function closeModal() {
-    try {
-      // Detener video y salir de fullscreen
-      $video.pause();
-      if (document.fullscreenElement) await document.exitFullscreen();
-
-      // Eliminar Plyr si existe
-      if (plyr) {
-        plyr.destroy();
-        plyr = null;
-      }
-
-      // Reset del video
-      $video.removeAttribute('src');
-      $video.load();
-      $modal.close();
-    } catch (err) {
-      console.error('Error al cerrar modal:', err);
-    }
-  }
-
-  // Eventos
-  $play.addEventListener('click', openModal);
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-  $video.addEventListener('ended', closeModal);
-
-  // Teclas
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.open) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') closeModal();
-  });
-</script>
-
-
-</body>
-</html>
+    if (!tituloParam) {
+      $titulo.textContent = 'Película no encontrada';
+      $play.style.display = 'none';
+    } else {
+      db.collection('peliculas')
+        .where('titulo', '==', decodeURIComponent(tituloParam))
+        .get()
+        .then(snap => {
+          if (snap.empty) throw new Error('No existe');
+          const p = snap.docs[0].data();
+          $titulo.textContent = p.titulo || 'Sin título';
+          if (p.anio) $anio.textContent = `Año: ${p.anio}`;
+          if (p.puntuacion) $punt.textContent = `⭐ ${p.puntuacion}/10`;
+          $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+          $hero.style.backgroundImage = `url(${p.imagen})`;
+          videoURL = p.tra
