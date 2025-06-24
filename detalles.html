@@ -297,31 +297,28 @@
       });
   }
 
-  /* -------- Abrir player en pantalla completa -------- */
+  /* -------- Abrir player -------- */
   $play.addEventListener('click', async () => {
     if (!videoURL) return;
 
-    $video.src = videoURL;
-
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
+    $video.setAttribute('src', videoURL);
+    $video.setAttribute('playsinline', true);
     $modal.showModal();
 
     setTimeout(async () => {
-      plyr = new Plyr($video, { autoplay: true });
+      if (!plyr) {
+        plyr = new Plyr($video, { autoplay: true });
+      }
 
       try {
         await $video.play();
 
-        // ✅ Pantalla completa sobre el VIDEO directamente
+        // Pantalla completa directa en el video
         if ($video.requestFullscreen) await $video.requestFullscreen();
         else if ($video.webkitRequestFullscreen) await $video.webkitRequestFullscreen();
         else if ($video.msRequestFullscreen) await $video.msRequestFullscreen();
       } catch (e) {
-        console.warn("No se pudo reproducir automáticamente:", e.message);
+        console.warn("Error al reproducir:", e.message);
       }
     }, 200);
   });
@@ -332,13 +329,13 @@
     $modal.close();
     $video.pause();
 
+    $video.removeAttribute('src');
+    $video.load(); // evita que se siga escuchando
+
     if (plyr) {
       plyr.destroy();
       plyr = null;
     }
-
-    $video.removeAttribute('src');
-    $video.load();
   }
 
   // Botón cerrar
@@ -361,7 +358,11 @@
       case ' ':
       case 'Enter':
         e.preventDefault();
-        if ($video.paused) $video.play(); else $video.pause();
+        if ($video.paused) {
+          $video.play();
+        } else {
+          $video.pause();
+        }
         break;
       case 'Escape':
       case 'Backspace':
@@ -370,8 +371,6 @@
     }
   });
 </script>
-
-
 
 </body>
 </html>
