@@ -149,9 +149,10 @@
     }
     .meta {
       display: flex;
-      gap: 28px;
+      gap: 14px;
       font-size: 1.5rem;
       color: #aaa;
+      flex-wrap: wrap;
     }
     .meta .rating {
       background: var(--gris);
@@ -235,15 +236,19 @@
   <section id="hero">
     <div class="menu-audio">
       <button id="audioBtn">🎧 Ver en ▾</button>
-      <div id="audioMenu"></div>
+      <div id="audioMenu">
+        <button class="audio-option" data-lang="latino">🔊 Latino</button>
+        <button class="audio-option" data-lang="castellano">🔊 Castellano</button>
+      </div>
     </div>
   </section>
 
   <section class="info">
     <h1 id="titulo" class="titulo">Cargando…</h1>
     <div class="meta">
-      <span id="anio"></span>
+      <span id="anio" class="rating"></span>
       <span id="puntuacion" class="rating"></span>
+      <span id="genero" class="rating"></span>
     </div>
     <p id="sinopsis" class="sinopsis"></p>
   </section>
@@ -269,6 +274,7 @@
   const $titulo = document.getElementById('titulo');
   const $anio = document.getElementById('anio');
   const $punt = document.getElementById('puntuacion');
+  const $genero = document.getElementById('genero');
   const $sin = document.getElementById('sinopsis');
 
   const $modal = document.getElementById('modalPlayer');
@@ -293,52 +299,17 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $anio.textContent = p.anio ? `📅 ${p.anio}` : '';
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
+        $genero.textContent = p.genero ? `🎬 ${p.genero}` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        videoLatino = (p.latino || '').trim();
-        videoCastellano = (p.castellano || '').trim();
+        videoLatino = p.latino || '';
+        videoCastellano = p.castellano || '';
 
-        const tieneLatino = videoLatino.length > 5;
-        const tieneCastellano = videoCastellano.length > 5;
-
-        $audioMenu.innerHTML = '';
-
-        if (tieneLatino && tieneCastellano) {
-          $audioBtn.style.display = 'block';
-          $audioBtn.textContent = '🎧 Ver en ▾';
-
-          const btnLat = document.createElement('button');
-          btnLat.className = 'audio-option';
-          btnLat.dataset.lang = 'latino';
-          btnLat.textContent = '🔊 Latino';
-          $audioMenu.appendChild(btnLat);
-
-          const btnCast = document.createElement('button');
-          btnCast.className = 'audio-option';
-          btnCast.dataset.lang = 'castellano';
-          btnCast.textContent = '🔊 Castellano';
-          $audioMenu.appendChild(btnCast);
-
-        } else if (tieneLatino) {
-          $audioBtn.textContent = '▶ Ver en Latino';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoLatino;
-            openModal();
-          };
-        } else if (tieneCastellano) {
-          $audioBtn.textContent = '▶ Ver en Castellano';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoCastellano;
-            openModal();
-          };
-        } else {
+        if (!videoLatino && !videoCastellano) {
           $audioBtn.style.display = 'none';
-          $audioMenu.style.display = 'none';
         }
       })
       .catch((err) => {
@@ -348,19 +319,15 @@
       });
   }
 
-  // Menú idioma (cuando hay dos opciones)
+  // Menú idioma
   $audioBtn.addEventListener('click', () => {
-    if (document.querySelectorAll('.audio-option').length > 0) {
-      $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
-      $audioMenu.style.flexDirection = 'column';
-    }
+    $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
+    $audioMenu.style.flexDirection = 'column';
   });
 
-  // Click en las opciones del menú o fuera para cerrar
-  document.addEventListener('click', (e) => {
-    const option = e.target.closest('.audio-option');
-    if (option) {
-      const lang = option.dataset.lang;
+  document.querySelectorAll('.audio-option').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const lang = e.target.dataset.lang;
       const url = lang === 'latino' ? videoLatino : videoCastellano;
       if (url) {
         videoURL = url;
@@ -369,7 +336,12 @@
         alert('Este idioma no está disponible.');
       }
       $audioMenu.style.display = 'none';
-    } else if (!e.target.closest('.menu-audio')) {
+    });
+  });
+
+  // Cerrar menú si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-audio')) {
       $audioMenu.style.display = 'none';
     }
   });
