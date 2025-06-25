@@ -154,13 +154,22 @@
       font-size: 1.5rem;
       color: #aaa;
     }
-    .meta .rating,
+    .meta .rating {
+      background: var(--primario);
+      padding: 4px 16px;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .meta .anio {
       background: var(--gris);
       padding: 4px 16px;
       border-radius: 14px;
-      color: var(--primario);
-      font-weight: 600;
+      color: #aaa;
+      font-weight: 500;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -168,12 +177,12 @@
     .meta .anio svg {
       width: 18px;
       height: 18px;
-      fill: var(--primario);
+      fill: #aaa;
     }
     .meta .rating svg {
       width: 18px;
       height: 18px;
-      fill: var(--primario);
+      fill: #fff;
     }
 
     .generos {
@@ -182,17 +191,15 @@
       gap: 10px;
     }
     .genero {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--primario);
       padding: 4px 12px;
       border-radius: 12px;
       font-size: 1.2rem;
-      color: #ccc;
-      border: 1px solid rgba(255,255,255,0.1);
-      transition: background 0.3s;
-    }
-    .genero:hover {
-      background: var(--primario);
       color: #fff;
+      font-weight: 600;
+      border: 1px solid var(--primario);
+      transition: background 0.3s;
+      cursor: default;
     }
 
     .sinopsis {
@@ -314,8 +321,7 @@
   let videoLatino = '';
   let videoCastellano = '';
   let videoURL = '';
-  let plyr = null;
-
+  
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
   if (!tituloParam) {
@@ -332,14 +338,14 @@
         $titulo.textContent = p.titulo || 'Sin título';
 
         $anio.innerHTML = p.anio
-          ? `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2
+          ? `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2
             2 0 0 0-2 2v14a2 2 0 0 0 2 
             2h14a2 2 0 0 0 2-2V6a2 2 0 
             0 0-2-2zm0 16H5V9h14zm0-11H5V6h14z"/></svg>${p.anio}`
           : '';
 
         $punt.innerHTML = p.puntuacion
-          ? `<svg viewBox="0 0 24 24"><path d="M12 17.27 18.18 
+          ? `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 17.27 18.18 
             21l-1.64-7.03L22 9.24l-7.19-.61L12 
             2 9.19 8.63 2 9.24l5.46 
             4.73L5.82 21z"/></svg>⭐ ${p.puntuacion}/10`
@@ -385,118 +391,72 @@
           btnCast.textContent = '🔊 Castellano';
           $audioMenu.appendChild(btnCast);
 
+          // Por defecto reproducir latino
+          videoURL = videoLatino;
         } else if (tieneLatino) {
-          $audioBtn.textContent = '▶ Ver en Latino';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoLatino;
-            openModal();
-          };
+          $audioBtn.style.display = 'none';
+          videoURL = videoLatino;
         } else if (tieneCastellano) {
-          $audioBtn.textContent = '▶ Ver en Castellano';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoCastellano;
-            openModal();
-          };
+          $audioBtn.style.display = 'none';
+          videoURL = videoCastellano;
         } else {
           $audioBtn.style.display = 'none';
-          $audioMenu.style.display = 'none';
+          videoURL = '';
         }
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(e => {
+        console.error(e);
         $titulo.textContent = 'Película no encontrada';
         $audioBtn.style.display = 'none';
       });
   }
 
-  // Menú idioma
+  // Toggle menú audio
   $audioBtn.addEventListener('click', () => {
-    if (document.querySelectorAll('.audio-option').length > 0) {
-      $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
-      $audioMenu.style.flexDirection = 'column';
+    if ($audioMenu.style.display === 'flex') {
+      $audioMenu.style.display = 'none';
+    } else {
+      $audioMenu.style.display = 'flex';
     }
   });
 
-  // Click fuera del menú o en opción
-  document.addEventListener('click', (e) => {
-    const option = e.target.closest('.audio-option');
-    if (option) {
-      const lang = option.dataset.lang;
-      const url = lang === 'latino' ? videoLatino : videoCastellano;
-      if (url) {
-        videoURL = url;
-        openModal();
-      } else {
-        alert('Este idioma no está disponible.');
+  // Seleccionar idioma audio
+  $audioMenu.addEventListener('click', e => {
+    if (e.target.classList.contains('audio-option')) {
+      const lang = e.target.dataset.lang;
+      if (lang === 'latino') {
+        videoURL = videoLatino;
+        $audioBtn.textContent = '🎧 Latino ▾';
+      } else if (lang === 'castellano') {
+        videoURL = videoCastellano;
+        $audioBtn.textContent = '🎧 Castellano ▾';
       }
       $audioMenu.style.display = 'none';
-    } else if (!e.target.closest('.menu-audio')) {
-      $audioMenu.style.display = 'none';
+      abrirModal();
     }
   });
 
-  // Modal Player
-  async function openModal() {
+  // Abrir modal reproductor
+  function abrirModal() {
     if (!videoURL) return;
-
-    $modal.classList.add('show');
-
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
-    $video.removeAttribute('src');
-    $video.load();
     $video.src = videoURL;
-
-    plyr = new Plyr($video, {
-      autoplay: true,
-      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
-    });
-
-    try {
-      await $video.play();
-      if ($modal.requestFullscreen) {
-        await $modal.requestFullscreen();
-      }
-    } catch (e) {
-      console.warn('Error al reproducir:', e);
-    }
+    $modal.classList.add('show');
+    $video.play();
   }
 
-  async function closeModal() {
-    try {
-      $video.pause();
-      $video.removeAttribute('src');
-      $video.load();
+  // Cerrar modal
+  document.getElementById('closeBtn').addEventListener('click', () => {
+    $modal.classList.remove('show');
+    $video.pause();
+    $video.src = '';
+  });
 
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-
+  // Cerrar modal con Escape
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && $modal.classList.contains('show')) {
       $modal.classList.remove('show');
-
-      setTimeout(() => {
-        if (plyr) {
-          plyr.destroy();
-          plyr = null;
-        }
-      }, 300);
-    } catch (error) {
-      console.error('Error al cerrar modal:', error);
-    }
-  }
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-  $video.addEventListener('ended', closeModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.classList.contains('show')) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') {
-      closeModal();
+      $video.pause();
+      $video.src = '';
     }
   });
 </script>
