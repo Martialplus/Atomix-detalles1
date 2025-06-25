@@ -149,16 +149,23 @@
     }
     .meta {
       display: flex;
-      gap: 28px;
-      font-size: 1.5rem;
-      color: #aaa;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    .meta .rating {
+    .meta .badge {
       background: var(--gris);
-      padding: 4px 16px;
-      border-radius: 14px;
-      color: var(--primario);
+      padding: 6px 16px;
+      border-radius: 20px;
+      color: #fff;
       font-weight: 600;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta .badge .emoji {
+      font-size: 1.3rem;
     }
     .sinopsis {
       font-size: 1.3rem;
@@ -242,8 +249,8 @@
   <section class="info">
     <h1 id="titulo" class="titulo">Cargando…</h1>
     <div class="meta">
-      <span id="anio"></span>
-      <span id="puntuacion" class="rating"></span>
+      <span id="anio" class="badge"></span>
+      <span id="puntuacion" class="badge"></span>
     </div>
     <p id="sinopsis" class="sinopsis"></p>
   </section>
@@ -293,8 +300,8 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
-        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
+        $anio.innerHTML = p.anio ? `<span class="emoji">📅</span> ${p.anio}` : '';
+        $punt.innerHTML = p.puntuacion ? `<span class="emoji">⭐</span> ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
