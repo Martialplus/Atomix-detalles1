@@ -161,7 +161,21 @@
       border-radius: 14px;
       color: var(--primario);
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .meta .anio svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--primario);
+    }
+    .meta .rating svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--primario);
+    }
+
     .generos {
       display: flex;
       flex-wrap: wrap;
@@ -316,163 +330,10 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? p.anio : '';
-        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
-        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
-        // Mostrar géneros
-        if (Array.isArray(p.genero) && p.genero.length > 0) {
-          $generos.innerHTML = '';
-          p.genero.forEach(g => {
-            const span = document.createElement('span');
-            span.className = 'genero';
-            span.textContent = g;
-            $generos.appendChild(span);
-          });
-        } else {
-          $generos.innerHTML = '';
-        }
-
-        videoLatino = (p.latino || '').trim();
-        videoCastellano = (p.castellano || '').trim();
-
-        const tieneLatino = videoLatino.length > 5;
-        const tieneCastellano = videoCastellano.length > 5;
-
-        $audioMenu.innerHTML = '';
-
-        if (tieneLatino && tieneCastellano) {
-          $audioBtn.style.display = 'block';
-          $audioBtn.textContent = '🎧 Ver en ▾';
-
-          const btnLat = document.createElement('button');
-          btnLat.className = 'audio-option';
-          btnLat.dataset.lang = 'latino';
-          btnLat.textContent = '🔊 Latino';
-          $audioMenu.appendChild(btnLat);
-
-          const btnCast = document.createElement('button');
-          btnCast.className = 'audio-option';
-          btnCast.dataset.lang = 'castellano';
-          btnCast.textContent = '🔊 Castellano';
-          $audioMenu.appendChild(btnCast);
-
-        } else if (tieneLatino) {
-          $audioBtn.textContent = '▶ Ver en Latino';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoLatino;
-            openModal();
-          };
-        } else if (tieneCastellano) {
-          $audioBtn.textContent = '▶ Ver en Castellano';
-          $audioMenu.style.display = 'none';
-          $audioBtn.onclick = () => {
-            videoURL = videoCastellano;
-            openModal();
-          };
-        } else {
-          $audioBtn.style.display = 'none';
-          $audioMenu.style.display = 'none';
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        $titulo.textContent = 'Película no encontrada';
-        $audioBtn.style.display = 'none';
-      });
-  }
-
-  // Menú idioma (cuando hay dos opciones)
-  $audioBtn.addEventListener('click', () => {
-    if (document.querySelectorAll('.audio-option').length > 0) {
-      $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
-      $audioMenu.style.flexDirection = 'column';
-    }
-  });
-
-  // Click en las opciones del menú o fuera para cerrar
-  document.addEventListener('click', (e) => {
-    const option = e.target.closest('.audio-option');
-    if (option) {
-      const lang = option.dataset.lang;
-      const url = lang === 'latino' ? videoLatino : videoCastellano;
-      if (url) {
-        videoURL = url;
-        openModal();
-      } else {
-        alert('Este idioma no está disponible.');
-      }
-      $audioMenu.style.display = 'none';
-    } else if (!e.target.closest('.menu-audio')) {
-      $audioMenu.style.display = 'none';
-    }
-  });
-
-  // Modal Player
-  async function openModal() {
-    if (!videoURL) return;
-
-    $modal.classList.add('show');
-
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
-    $video.removeAttribute('src');
-    $video.load();
-    $video.src = videoURL;
-
-    plyr = new Plyr($video, {
-      autoplay: true,
-      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
-    });
-
-    try {
-      await $video.play();
-      if ($modal.requestFullscreen) {
-        await $modal.requestFullscreen();
-      }
-    } catch (e) {
-      console.warn('Error al reproducir:', e);
-    }
-  }
-
-  async function closeModal() {
-    try {
-      $video.pause();
-      $video.removeAttribute('src');
-      $video.load();
-
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-
-      $modal.classList.remove('show');
-
-      setTimeout(() => {
-        if (plyr) {
-          plyr.destroy();
-          plyr = null;
-        }
-      }, 300);
-    } catch (error) {
-      console.error('Error al cerrar modal:', error);
-    }
-  }
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-  $video.addEventListener('ended', closeModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.classList.contains('show')) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') {
-      closeModal();
-    }
-  });
-</script>
-
-</body>
-</html>
+        $anio.innerHTML = p.anio
+          ? `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2
+            2 0 0 0-2 2v14a2 2 0 0 0 2 
+            2h14a2 2 0 0 0 2-2V6a2 2 0 
+            0 0-2-2zm0 16H5V9h14zm0-11H5V6h14z"/></svg>${p.anio}`
+          : '';
