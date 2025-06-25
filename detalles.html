@@ -9,7 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Plyr -->
+  <!-- Plyr CSS y JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
@@ -24,7 +24,7 @@
       box-sizing: border-box;
     }
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       background: #000;
       color: #fff;
       overflow-x: hidden;
@@ -34,22 +34,23 @@
       min-height: 100vh;
       padding: 20px;
     }
+
     .btn-back {
       position: fixed;
       top: 24px;
       left: 24px;
+      z-index: 100;
       width: 48px;
       height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0,0,0,0.55);
       border: none;
       border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(6px);
       cursor: pointer;
       transition: 0.25s;
-      z-index: 100;
     }
     .btn-back:hover {
       background: var(--primario);
@@ -70,42 +71,23 @@
       margin-bottom: 20px;
       border-radius: 12px;
       overflow: hidden;
+      max-width: 1200px;
     }
     #hero::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.85) 15%, rgba(0,0,0,0) 60%);
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 15%,
+        rgba(0, 0, 0, 0) 60%
+      );
       pointer-events: none;
     }
 
-    .menu-audio {
-      position: absolute;
-      bottom: 24px;
-      left: 24px;
-      display: flex;
-      gap: 16px;
-      z-index: 10;
-    }
-    .menu-audio button {
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(6px);
-      border: none;
-      border-radius: 30px;
-      padding: 10px 20px;
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: 0.25s;
-    }
-    .menu-audio button:hover {
-      background: var(--primario);
-      transform: scale(1.05);
-    }
-
     .info {
-      width: 100%;
       max-width: 1200px;
+      width: 100%;
       padding: 0 20px;
       display: flex;
       flex-direction: column;
@@ -114,10 +96,12 @@
     .titulo {
       font-size: 3rem;
       font-weight: 700;
+      line-height: 1.2;
     }
     .meta {
       display: flex;
       gap: 28px;
+      font-size: 1.2rem;
       color: #aaa;
     }
     .meta .rating {
@@ -128,10 +112,66 @@
       font-weight: 600;
     }
     .sinopsis {
+      font-size: 1.1rem;
       line-height: 1.6;
+      max-width: 100%;
       color: #ddd;
     }
 
+    /* Dropdown Reproducir */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropbtn {
+      background-color: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      color: white;
+      padding: 10px 24px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+    .dropbtn:hover {
+      background-color: var(--primario);
+      transform: scale(1.05);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #222;
+      min-width: 220px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
+      border-radius: 12px;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .dropdown-content button {
+      color: white;
+      padding: 14px 18px;
+      text-align: left;
+      border: none;
+      background: none;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1rem;
+    }
+
+    .dropdown-content button:hover {
+      background-color: var(--primario);
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* Modal Player */
     #modalPlayer {
       position: fixed;
       inset: 0;
@@ -144,11 +184,14 @@
     #modalPlayer.show {
       display: flex;
     }
+
     #player {
       width: 100vw !important;
       height: 100vh !important;
       background: black;
+      border-radius: 0;
     }
+
     #closeBtn {
       position: absolute;
       top: 20px;
@@ -171,38 +214,47 @@
       .titulo {
         font-size: 2rem;
       }
+      .meta {
+        font-size: 1rem;
+        gap: 16px;
+      }
+      .sinopsis {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<button class="btn-back" onclick="history.back()" aria-label="Volver">
-  <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
-</button>
+  <button class="btn-back" onclick="history.back()" aria-label="Volver">
+    <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
+  </button>
 
-<section id="hero">
-  <div class="menu-audio" id="menuAudio" style="display: none;">
-    <button id="btnLatino" style="display: none;">▶ Ver en Latino</button>
-    <button id="btnCastellano" style="display: none;">▶ Ver en Castellano</button>
+  <section id="hero"></section>
+
+  <section class="info">
+    <h1 id="titulo" class="titulo">Cargando…</h1>
+    <div class="meta">
+      <span id="anio"></span>
+      <span id="puntuacion" class="rating"></span>
+    </div>
+    <p id="sinopsis" class="sinopsis"></p>
+
+    <!-- Dropdown Reproducir -->
+    <div class="dropdown" id="menuAudio" style="display:none;">
+      <button class="dropbtn">▶ Reproducir</button>
+      <div class="dropdown-content" id="dropdownOptions"></div>
+    </div>
+  </section>
+
+  <!-- Modal Player -->
+  <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
+    <button id="closeBtn" aria-label="Cerrar reproductor">✕ Cerrar</button>
+    <video id="player" playsinline controls></video>
   </div>
-</section>
-
-<section class="info">
-  <h1 id="titulo" class="titulo">Cargando…</h1>
-  <div class="meta">
-    <span id="anio"></span>
-    <span id="puntuacion" class="rating"></span>
-  </div>
-  <p id="sinopsis" class="sinopsis"></p>
-</section>
-
-<div id="modalPlayer" role="dialog" aria-modal="true">
-  <button id="closeBtn">✕ Cerrar</button>
-  <video id="player" playsinline controls></video>
-</div>
 
 <script>
-  // Config Firebase
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
     authDomain: "atomix-54e1a.firebaseapp.com",
@@ -211,26 +263,83 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Elementos
+  // DOM
   const $hero = document.getElementById('hero');
-  const $menu = document.getElementById('menuAudio');
-  const $btnLatino = document.getElementById('btnLatino');
-  const $btnCastellano = document.getElementById('btnCastellano');
-
   const $titulo = document.getElementById('titulo');
   const $anio = document.getElementById('anio');
   const $punt = document.getElementById('puntuacion');
   const $sin = document.getElementById('sinopsis');
+  const $menu = document.getElementById('menuAudio');
+  const $dropdown = document.getElementById('dropdownOptions');
 
   const $modal = document.getElementById('modalPlayer');
   const $video = document.getElementById('player');
 
   let plyr = null;
-  let videoLatino = '';
-  let videoCastellano = '';
 
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
+  function crearOpcion(nombre, url) {
+    const btn = document.createElement('button');
+    btn.textContent = nombre;
+    btn.onclick = () => openModal(url);
+    $dropdown.appendChild(btn);
+  }
+
+  function openModal(videoURL) {
+    if (!videoURL) return;
+
+    $modal.classList.add('show');
+
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    $video.src = videoURL;
+
+    plyr = new Plyr($video, {
+      autoplay: true,
+      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
+    });
+
+    $video.play();
+
+    if ($modal.requestFullscreen) {
+      $modal.requestFullscreen();
+    }
+  }
+
+  async function closeModal() {
+    try {
+      $video.pause();
+      $video.removeAttribute('src');
+      $video.load();
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      $modal.classList.remove('show');
+      setTimeout(() => {
+        if (plyr) {
+          plyr.destroy();
+          plyr = null;
+        }
+      }, 300);
+    } catch (error) {
+      console.error('Error al cerrar modal:', error);
+    }
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.classList.contains('show')) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      closeModal();
+    }
+  });
+
+  // Fetch datos
   if (!tituloParam) {
     $titulo.textContent = 'Película no encontrada';
   } else {
@@ -247,20 +356,22 @@
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        videoLatino = (p.latino || '').trim();
-        videoCastellano = (p.castellano || '').trim();
+        const videoLatino = (p.latino || '').trim();
+        const videoCastellano = (p.castellano || '').trim();
 
         const tieneLatino = videoLatino.length > 5;
         const tieneCastellano = videoCastellano.length > 5;
 
-        if (tieneLatino) {
-          $btnLatino.style.display = 'block';
-        }
-        if (tieneCastellano) {
-          $btnCastellano.style.display = 'block';
-        }
-        if (tieneLatino || tieneCastellano) {
-          $menu.style.display = 'flex';
+        if (tieneLatino && tieneCastellano) {
+          crearOpcion('▶ Ver en Latino', videoLatino);
+          crearOpcion('▶ Ver en Castellano', videoCastellano);
+          $menu.style.display = 'inline-block';
+        } else if (tieneLatino) {
+          $menu.querySelector('.dropbtn').onclick = () => openModal(videoLatino);
+          $menu.style.display = 'inline-block';
+        } else if (tieneCastellano) {
+          $menu.querySelector('.dropbtn').onclick = () => openModal(videoCastellano);
+          $menu.style.display = 'inline-block';
         }
       })
       .catch((err) => {
@@ -268,62 +379,6 @@
         $titulo.textContent = 'Película no encontrada';
       });
   }
-
-  function openModal(url) {
-    if (!url) return;
-    $modal.classList.add('show');
-
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
-    $video.src = url;
-    plyr = new Plyr($video, {
-      autoplay: true,
-      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
-    });
-
-    $video.play();
-
-    // Fullscreen
-    if ($modal.requestFullscreen) {
-      $modal.requestFullscreen();
-    }
-  }
-
-  function closeModal() {
-    try {
-      $video.pause();
-      $video.removeAttribute('src');
-      $video.load();
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-      $modal.classList.remove('show');
-      setTimeout(() => {
-        if (plyr) {
-          plyr.destroy();
-          plyr = null;
-        }
-      }, 300);
-    } catch (error) {
-      console.error('Error al cerrar modal:', error);
-    }
-  }
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-  $video.addEventListener('ended', closeModal);
-
-  $btnLatino.addEventListener('click', () => openModal(videoLatino));
-  $btnCastellano.addEventListener('click', () => openModal(videoCastellano));
-
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.classList.contains('show')) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') {
-      closeModal();
-    }
-  });
 </script>
 
 </body>
