@@ -150,41 +150,33 @@
     .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 18px;
+      gap: 12px;
       font-size: 1.5rem;
       color: #aaa;
-      align-items: center;
     }
-    .meta .rating {
+    .meta .rating,
+    .meta .anio {
       background: var(--gris);
       padding: 4px 16px;
       border-radius: 14px;
       color: var(--primario);
       font-weight: 600;
     }
-    .meta .anio {
-      padding: 4px 16px;
-      border-radius: 14px;
-      background: var(--gris);
-      color: #ccc;
-      border: 1px solid #333;
-    }
-
     .generos {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
     }
-    .generos .genero {
+    .genero {
+      background: rgba(255, 255, 255, 0.08);
       padding: 4px 12px;
-      background: var(--gris);
-      color: var(--primario);
-      border-radius: 999px;
-      font-size: 1.3rem;
-      border: 1px solid var(--primario);
-      transition: background 0.25s;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      color: #ccc;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.3s;
     }
-    .generos .genero:hover {
+    .genero:hover {
       background: var(--primario);
       color: #fff;
     }
@@ -324,7 +316,7 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $anio.textContent = p.anio ? p.anio : '';
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
@@ -332,10 +324,10 @@
         // Mostrar géneros
         if (Array.isArray(p.genero) && p.genero.length > 0) {
           $generos.innerHTML = '';
-          p.genero.forEach(gen => {
+          p.genero.forEach(g => {
             const span = document.createElement('span');
             span.className = 'genero';
-            span.textContent = gen;
+            span.textContent = g;
             $generos.appendChild(span);
           });
         } else {
@@ -392,6 +384,7 @@
       });
   }
 
+  // Menú idioma (cuando hay dos opciones)
   $audioBtn.addEventListener('click', () => {
     if (document.querySelectorAll('.audio-option').length > 0) {
       $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
@@ -399,6 +392,7 @@
     }
   });
 
+  // Click en las opciones del menú o fuera para cerrar
   document.addEventListener('click', (e) => {
     const option = e.target.closest('.audio-option');
     if (option) {
@@ -416,6 +410,7 @@
     }
   });
 
+  // Modal Player
   async function openModal() {
     if (!videoURL) return;
 
