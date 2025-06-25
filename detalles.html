@@ -245,7 +245,7 @@
   <section class="info">
     <h1 id="titulo" class="titulo">Cargando…</h1>
     <div class="meta">
-      <span id="anio"></span>
+      <span id="anio" class="rating"></span>
       <span id="puntuacion" class="rating"></span>
     </div>
     <p id="sinopsis" class="sinopsis"></p>
@@ -296,7 +296,7 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $anio.textContent = p.anio ? `🎬 ${p.anio}` : '';
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
