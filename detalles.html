@@ -242,15 +242,14 @@
     </div>
   </section>
 
-<section class="info">
-  <h1 id="titulo" class="titulo">Cargando…</h1>
-  <div class="meta">
-    <time id="anio" class="anio" datetime=""></time>
-    <meter id="puntuacion" class="rating" min="0" max="10" value="0">0</meter>
-    <ul id="generos" class="generos"></ul>
-  </div>
-  <p id="sinopsis" class="sinopsis"></p>
-</section>
+  <section class="info">
+    <h1 id="titulo" class="titulo">Cargando…</h1>
+    <div class="meta">
+      <span id="anio"></span>
+      <span id="puntuacion" class="rating"></span>
+    </div>
+    <p id="sinopsis" class="sinopsis"></p>
+  </section>
 
   <!-- Modal Player -->
   <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
@@ -274,7 +273,6 @@
   const $anio = document.getElementById('anio');
   const $punt = document.getElementById('puntuacion');
   const $sin = document.getElementById('sinopsis');
-  const $generos = document.getElementById('generos');
 
   const $modal = document.getElementById('modalPlayer');
   const $video = document.getElementById('player');
@@ -298,21 +296,8 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-
-        if (p.anio) {
-          $anio.textContent = p.anio;
-          $anio.setAttribute('datetime', p.anio);
-        }
-
-        if (p.puntuacion) {
-          $punt.value = p.puntuacion;
-          $punt.textContent = `${p.puntuacion}/10`;
-        }
-
-        if (Array.isArray(p.generos)) {
-          $generos.innerHTML = p.generos.map(g => `<li>${g}</li>`).join('');
-        }
-
+        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
