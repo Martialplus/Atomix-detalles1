@@ -303,7 +303,7 @@
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $genero.textContent = p.genero ? `🎬 ${p.genero}` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
+        $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
         videoLatino = p.latino || '';
         videoCastellano = p.castellano || '';
