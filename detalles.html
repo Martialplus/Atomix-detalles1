@@ -69,9 +69,8 @@
       background: center / cover no-repeat #222;
       position: relative;
       margin-bottom: 20px;
-      border-radius: 12px;
+      border-radius: 20px;
       overflow: hidden;
-      max-width: 1200px;
     }
     #hero::after {
       content: "";
@@ -85,23 +84,73 @@
       pointer-events: none;
     }
 
-    .info {
-      max-width: 1200px;
+    .menu-audio {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    #audioBtn {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      border: none;
+      padding: 16px 28px;
+      font-size: 2rem;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #audioBtn:hover {
+      background: var(--primario);
+    }
+
+    #audioMenu {
+      display: none;
+      margin-top: 12px;
+      background: rgba(20, 20, 20, 0.9);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      flex-direction: column;
+    }
+
+    #audioMenu .audio-option {
       width: 100%;
+      padding: 16px 28px;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #audioMenu .audio-option:hover {
+      background: var(--primario);
+    }
+
+    .info {
+      width: 100%;
+      max-width: 1600px;
       padding: 0 20px;
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
     .titulo {
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 700;
       line-height: 1.2;
     }
     .meta {
       display: flex;
       gap: 28px;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       color: #aaa;
     }
     .meta .rating {
@@ -112,63 +161,10 @@
       font-weight: 600;
     }
     .sinopsis {
-      font-size: 1.1rem;
-      line-height: 1.6;
+      font-size: 1.3rem;
+      line-height: 1.8;
       max-width: 100%;
       color: #ddd;
-    }
-
-    /* Dropdown Reproducir */
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropbtn {
-      background-color: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-      color: white;
-      padding: 10px 24px;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: 0.25s;
-    }
-    .dropbtn:hover {
-      background-color: var(--primario);
-      transform: scale(1.05);
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #222;
-      min-width: 220px;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
-      border-radius: 12px;
-      z-index: 1;
-      overflow: hidden;
-    }
-
-    .dropdown-content button {
-      color: white;
-      padding: 14px 18px;
-      text-align: left;
-      border: none;
-      background: none;
-      width: 100%;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 1rem;
-    }
-
-    .dropdown-content button:hover {
-      background-color: var(--primario);
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: block;
     }
 
     /* Modal Player */
@@ -184,14 +180,12 @@
     #modalPlayer.show {
       display: flex;
     }
-
     #player {
       width: 100vw !important;
       height: 100vh !important;
       background: black;
       border-radius: 0;
     }
-
     #closeBtn {
       position: absolute;
       top: 20px;
@@ -212,25 +206,41 @@
 
     @media (max-width: 900px) {
       .titulo {
-        font-size: 2rem;
+        font-size: 2.5rem;
       }
       .meta {
-        font-size: 1rem;
-        gap: 16px;
+        font-size: 1.2rem;
       }
       .sinopsis {
-        font-size: 1rem;
+        font-size: 1.1rem;
+      }
+      #audioBtn {
+        font-size: 1.5rem;
+        padding: 12px 20px;
+      }
+      #audioMenu .audio-option {
+        font-size: 1.5rem;
+        padding: 12px 20px;
       }
     }
   </style>
 </head>
+
 <body>
 
   <button class="btn-back" onclick="history.back()" aria-label="Volver">
     <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
   </button>
 
-  <section id="hero"></section>
+  <section id="hero">
+    <div class="menu-audio">
+      <button id="audioBtn">🎧 Ver en ▾</button>
+      <div id="audioMenu">
+        <button class="audio-option" data-lang="latino">🔊 Latino</button>
+        <button class="audio-option" data-lang="castellano">🔊 Castellano</button>
+      </div>
+    </div>
+  </section>
 
   <section class="info">
     <h1 id="titulo" class="titulo">Cargando…</h1>
@@ -239,12 +249,6 @@
       <span id="puntuacion" class="rating"></span>
     </div>
     <p id="sinopsis" class="sinopsis"></p>
-
-    <!-- Dropdown Reproducir -->
-    <div class="dropdown" id="menuAudio" style="display:none;">
-      <button class="dropbtn">▶ Reproducir</button>
-      <div class="dropdown-content" id="dropdownOptions"></div>
-    </div>
   </section>
 
   <!-- Modal Player -->
@@ -254,7 +258,6 @@
   </div>
 
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
     authDomain: "atomix-54e1a.firebaseapp.com",
@@ -263,85 +266,27 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // DOM
   const $hero = document.getElementById('hero');
+  const $audioBtn = document.getElementById('audioBtn');
+  const $audioMenu = document.getElementById('audioMenu');
   const $titulo = document.getElementById('titulo');
   const $anio = document.getElementById('anio');
   const $punt = document.getElementById('puntuacion');
   const $sin = document.getElementById('sinopsis');
-  const $menu = document.getElementById('menuAudio');
-  const $dropdown = document.getElementById('dropdownOptions');
 
   const $modal = document.getElementById('modalPlayer');
   const $video = document.getElementById('player');
 
+  let videoLatino = '';
+  let videoCastellano = '';
+  let videoURL = '';
   let plyr = null;
 
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
-  function crearOpcion(nombre, url) {
-    const btn = document.createElement('button');
-    btn.textContent = nombre;
-    btn.onclick = () => openModal(url);
-    $dropdown.appendChild(btn);
-  }
-
-  function openModal(videoURL) {
-    if (!videoURL) return;
-
-    $modal.classList.add('show');
-
-    if (plyr) {
-      plyr.destroy();
-      plyr = null;
-    }
-
-    $video.src = videoURL;
-
-    plyr = new Plyr($video, {
-      autoplay: true,
-      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
-    });
-
-    $video.play();
-
-    if ($modal.requestFullscreen) {
-      $modal.requestFullscreen();
-    }
-  }
-
-  async function closeModal() {
-    try {
-      $video.pause();
-      $video.removeAttribute('src');
-      $video.load();
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-      $modal.classList.remove('show');
-      setTimeout(() => {
-        if (plyr) {
-          plyr.destroy();
-          plyr = null;
-        }
-      }, 300);
-    } catch (error) {
-      console.error('Error al cerrar modal:', error);
-    }
-  }
-
-  document.getElementById('closeBtn').addEventListener('click', closeModal);
-  $video.addEventListener('ended', closeModal);
-  document.addEventListener('keydown', (e) => {
-    if (!$modal.classList.contains('show')) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') {
-      closeModal();
-    }
-  });
-
-  // Fetch datos
   if (!tituloParam) {
     $titulo.textContent = 'Película no encontrada';
+    $audioBtn.style.display = 'none';
   } else {
     db.collection('peliculas')
       .where('titulo', '==', decodeURIComponent(tituloParam))
@@ -356,29 +301,109 @@
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        const videoLatino = (p.latino || '').trim();
-        const videoCastellano = (p.castellano || '').trim();
+        videoLatino = p.latino || '';
+        videoCastellano = p.castellano || '';
 
-        const tieneLatino = videoLatino.length > 5;
-        const tieneCastellano = videoCastellano.length > 5;
-
-        if (tieneLatino && tieneCastellano) {
-          crearOpcion('▶ Ver en Latino', videoLatino);
-          crearOpcion('▶ Ver en Castellano', videoCastellano);
-          $menu.style.display = 'inline-block';
-        } else if (tieneLatino) {
-          $menu.querySelector('.dropbtn').onclick = () => openModal(videoLatino);
-          $menu.style.display = 'inline-block';
-        } else if (tieneCastellano) {
-          $menu.querySelector('.dropbtn').onclick = () => openModal(videoCastellano);
-          $menu.style.display = 'inline-block';
+        if (!videoLatino && !videoCastellano) {
+          $audioBtn.style.display = 'none';
         }
       })
       .catch((err) => {
         console.error(err);
         $titulo.textContent = 'Película no encontrada';
+        $audioBtn.style.display = 'none';
       });
   }
+
+  // Menú idioma
+  $audioBtn.addEventListener('click', () => {
+    $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
+    $audioMenu.style.flexDirection = 'column';
+  });
+
+  document.querySelectorAll('.audio-option').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const lang = e.target.dataset.lang;
+      const url = lang === 'latino' ? videoLatino : videoCastellano;
+      if (url) {
+        videoURL = url;
+        openModal();
+      } else {
+        alert('Este idioma no está disponible.');
+      }
+      $audioMenu.style.display = 'none';
+    });
+  });
+
+  // Cerrar menú si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-audio')) {
+      $audioMenu.style.display = 'none';
+    }
+  });
+
+  // Modal Player
+  async function openModal() {
+    if (!videoURL) return;
+
+    $modal.classList.add('show');
+
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    $video.removeAttribute('src');
+    $video.load();
+    $video.src = videoURL;
+
+    plyr = new Plyr($video, {
+      autoplay: true,
+      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
+    });
+
+    try {
+      await $video.play();
+      if ($modal.requestFullscreen) {
+        await $modal.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Error al reproducir:', e);
+    }
+  }
+
+  async function closeModal() {
+    try {
+      $video.pause();
+      $video.removeAttribute('src');
+      $video.load();
+
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+
+      $modal.classList.remove('show');
+
+      setTimeout(() => {
+        if (plyr) {
+          plyr.destroy();
+          plyr = null;
+        }
+      }, 300);
+    } catch (error) {
+      console.error('Error al cerrar modal:', error);
+    }
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.classList.contains('show')) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      closeModal();
+    }
+  });
 </script>
 
 </body>
