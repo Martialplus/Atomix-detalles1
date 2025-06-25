@@ -149,24 +149,46 @@
     }
     .meta {
       display: flex;
-      gap: 14px;
       flex-wrap: wrap;
+      gap: 18px;
+      font-size: 1.5rem;
+      color: #aaa;
       align-items: center;
     }
-    .meta .badge {
+    .meta .rating {
       background: var(--gris);
-      padding: 6px 16px;
-      border-radius: 20px;
-      color: #fff;
+      padding: 4px 16px;
+      border-radius: 14px;
+      color: var(--primario);
       font-weight: 600;
-      font-size: 1.4rem;
+    }
+    .meta .anio {
+      padding: 4px 16px;
+      border-radius: 14px;
+      background: var(--gris);
+      color: #ccc;
+      border: 1px solid #333;
+    }
+
+    .generos {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .meta .badge .emoji {
+    .generos .genero {
+      padding: 4px 12px;
+      background: var(--gris);
+      color: var(--primario);
+      border-radius: 999px;
       font-size: 1.3rem;
+      border: 1px solid var(--primario);
+      transition: background 0.25s;
     }
+    .generos .genero:hover {
+      background: var(--primario);
+      color: #fff;
+    }
+
     .sinopsis {
       font-size: 1.3rem;
       line-height: 1.8;
@@ -249,8 +271,9 @@
   <section class="info">
     <h1 id="titulo" class="titulo">Cargando…</h1>
     <div class="meta">
-      <span id="anio" class="badge"></span>
-      <span id="puntuacion" class="badge"></span>
+      <span id="anio" class="anio"></span>
+      <span id="puntuacion" class="rating"></span>
+      <div id="generos" class="generos"></div>
     </div>
     <p id="sinopsis" class="sinopsis"></p>
   </section>
@@ -277,6 +300,7 @@
   const $anio = document.getElementById('anio');
   const $punt = document.getElementById('puntuacion');
   const $sin = document.getElementById('sinopsis');
+  const $generos = document.getElementById('generos');
 
   const $modal = document.getElementById('modalPlayer');
   const $video = document.getElementById('player');
@@ -300,10 +324,23 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $anio.innerHTML = p.anio ? `<span class="emoji">📅</span> ${p.anio}` : '';
-        $punt.innerHTML = p.puntuacion ? `<span class="emoji">⭐</span> ${p.puntuacion}/10` : '';
+        $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
+        $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
+
+        // Mostrar géneros
+        if (Array.isArray(p.genero) && p.genero.length > 0) {
+          $generos.innerHTML = '';
+          p.genero.forEach(gen => {
+            const span = document.createElement('span');
+            span.className = 'genero';
+            span.textContent = gen;
+            $generos.appendChild(span);
+          });
+        } else {
+          $generos.innerHTML = '';
+        }
 
         videoLatino = (p.latino || '').trim();
         videoCastellano = (p.castellano || '').trim();
@@ -355,7 +392,6 @@
       });
   }
 
-  // Menú idioma (cuando hay dos opciones)
   $audioBtn.addEventListener('click', () => {
     if (document.querySelectorAll('.audio-option').length > 0) {
       $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
@@ -363,7 +399,6 @@
     }
   });
 
-  // Click en las opciones del menú o fuera para cerrar
   document.addEventListener('click', (e) => {
     const option = e.target.closest('.audio-option');
     if (option) {
@@ -381,7 +416,6 @@
     }
   });
 
-  // Modal Player
   async function openModal() {
     if (!videoURL) return;
 
