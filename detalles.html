@@ -296,7 +296,7 @@
         $anio.textContent = p.anio ? `Año: ${p.anio}` : '';
         $punt.textContent = p.puntuacion ? `⭐ ${p.puntuacion}/10` : '';
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
+        $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
         videoLatino = (p.latino || '').trim();
         videoCastellano = (p.castellano || '').trim();
