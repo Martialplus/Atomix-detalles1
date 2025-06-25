@@ -13,306 +13,250 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
   <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 
-<style>
-  :root {
-    --primario: #00aaff;
-    --gris: #1b1b1b;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #000;
-    color: #fff;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .btn-back {
-    position: fixed;
-    top: 24px;
-    left: 24px;
-    z-index: 100;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    transition: 0.25s;
-  }
-
-  .btn-back:hover {
-    background: var(--primario);
-    transform: scale(1.05);
-  }
-
-  .btn-back svg {
-    width: 24px;
-    height: 24px;
-    fill: #fff;
-  }
-
-  #hero {
-    width: 100%;
-    height: 60vh;
-    min-height: 360px;
-    background: center / cover no-repeat #222;
-    position: relative;
-    margin-bottom: 20px;
-    border-radius: 20px;
-    overflow: hidden;
-  }
-
-  #hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 15%, rgba(0, 0, 0, 0) 60%);
-    pointer-events: none;
-  }
-
-  .menu-audio {
-    position: absolute;
-    bottom: 40px;
-    left: 40px;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-  }
-
-  #audioBtn {
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(6px);
-    border: none;
-    padding: 16px 28px;
-    font-size: 2rem;
-    border-radius: 12px;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  #audioBtn:hover {
-    background: var(--primario);
-  }
-
-  #audioMenu {
-    display: none;
-    margin-top: 12px;
-    background: rgba(20, 20, 20, 0.9);
-    backdrop-filter: blur(6px);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-    flex-direction: column;
-  }
-
-  #audioMenu .audio-option {
-    width: 100%;
-    padding: 16px 28px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.8rem;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  #audioMenu .audio-option:hover {
-    background: var(--primario);
-  }
-
-  .info {
-    width: 100%;
-    max-width: 1600px;
-    padding: 0 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .titulo {
-    font-size: 3.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 1.5rem;
-    color: #aaa;
-  }
-
-  .meta .rating {
-    background: var(--primario);
-    padding: 4px 16px;
-    border-radius: 14px;
-    color: #fff;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .meta .anio {
-    background: var(--gris);
-    padding: 4px 16px;
-    border-radius: 14px;
-    color: #aaa;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .meta .anio svg,
-  .meta .rating svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-  }
-
-  .generos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .genero {
-    background: var(--primario);
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 1.2rem;
-    color: #fff;
-    font-weight: 600;
-    border: 1px solid var(--primario);
-    transition: background 0.3s;
-    cursor: default;
-  }
-
-  .sinopsis {
-    font-size: 1.3rem;
-    line-height: 1.8;
-    max-width: 100%;
-    color: #ddd;
-  }
-
-  /* Modal Player */
-  #modalPlayer {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-  }
-
-  #modalPlayer.show {
-    display: flex;
-  }
-
-  #player {
-    width: 100vw !important;
-    height: 100vh !important;
-    background: black;
-    border-radius: 0;
-  }
-
-  #closeBtn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: var(--primario);
-    border: none;
-    padding: 10px 15px;
-    font-size: 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    color: white;
-    z-index: 10001;
-    transition: background 0.3s;
-  }
-
-  #closeBtn:hover {
-    background: #0088cc;
-  }
-
-  @media (max-width: 900px) {
-    .titulo {
-      font-size: 2.5rem;
+  <style>
+    :root {
+      --primario: #00aaff;
+      --gris: #1b1b1b;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
 
-    .meta {
-      font-size: 1.2rem;
+    .btn-back {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: 0.25s;
+    }
+    .btn-back:hover {
+      background: var(--primario);
+      transform: scale(1.05);
+    }
+    .btn-back svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
     }
 
-    .sinopsis {
-      font-size: 1.1rem;
+    #hero {
+      width: 100%;
+      height: 60vh;
+      min-height: 360px;
+      background: center / cover no-repeat #222;
+      position: relative;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    #hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 15%,
+        rgba(0, 0, 0, 0) 60%
+      );
+      pointer-events: none;
+    }
+
+    .menu-audio {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
     }
 
     #audioBtn {
-      font-size: 1.5rem;
-      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      border: none;
+      padding: 16px 28px;
+      font-size: 2rem;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #audioBtn:hover {
+      background: var(--primario);
+    }
+
+    #audioMenu {
+      display: none;
+      margin-top: 12px;
+      background: rgba(20, 20, 20, 0.9);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      flex-direction: column;
     }
 
     #audioMenu .audio-option {
-      font-size: 1.5rem;
-      padding: 12px 20px;
+      width: 100%;
+      padding: 16px 28px;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-  }
-</style>
-  
+    #audioMenu .audio-option:hover {
+      background: var(--primario);
+    }
+
+    .info {
+      width: 100%;
+      max-width: 1600px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .titulo {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .meta {
+      display: flex;
+      gap: 28px;
+      font-size: 1.5rem;
+      color: #aaa;
+    }
+    .meta .rating {
+      background: var(--gris);
+      padding: 4px 16px;
+      border-radius: 14px;
+      color: var(--primario);
+      font-weight: 600;
+    }
+    .sinopsis {
+      font-size: 1.3rem;
+      line-height: 1.8;
+      max-width: 100%;
+      color: #ddd;
+    }
+
+    /* Modal Player */
+    #modalPlayer {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    #modalPlayer.show {
+      display: flex;
+    }
+    #player {
+      width: 100vw !important;
+      height: 100vh !important;
+      background: black;
+      border-radius: 0;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--primario);
+      border: none;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      z-index: 10001;
+      transition: background 0.3s;
+    }
+    #closeBtn:hover {
+      background: #0088cc;
+    }
+
+    @media (max-width: 900px) {
+      .titulo {
+        font-size: 2.5rem;
+      }
+      .meta {
+        font-size: 1.2rem;
+      }
+      .sinopsis {
+        font-size: 1.1rem;
+      }
+      #audioBtn {
+        font-size: 1.5rem;
+        padding: 12px 20px;
+      }
+      #audioMenu .audio-option {
+        font-size: 1.5rem;
+        padding: 12px 20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<button class="btn-back" onclick="history.back()" aria-label="Volver">
-  <svg viewBox="0 0 24 24">
-    <path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z" />
-  </svg>
-</button>
+  <button class="btn-back" onclick="history.back()" aria-label="Volver">
+    <svg viewBox="0 0 24 24"><path d="M15.41 16.59 10.83 12 15.41 7.41 14 6l-6 6 6 6z"/></svg>
+  </button>
 
-<section id="hero">
-  <div class="menu-audio">
-    <button id="audioBtn">🎧 Ver en ▾</button>
-    <div id="audioMenu"></div>
-  </div>
-</section>
+  <section id="hero">
+    <div class="menu-audio">
+      <button id="audioBtn">🎧 Ver en ▾</button>
+      <div id="audioMenu">
+        <button class="audio-option" data-lang="latino">🔊 Latino</button>
+        <button class="audio-option" data-lang="castellano">🔊 Castellano</button>
+      </div>
+    </div>
+  </section>
 
 <section class="info">
   <h1 id="titulo" class="titulo">Cargando…</h1>
-
   <div class="meta">
     <time id="anio" class="anio" datetime=""></time>
-    <meter id="puntuacion" class="rating" min="0" max="10" value="0">0/10</meter>
+    <meter id="puntuacion" class="rating" min="0" max="10" value="0">0</meter>
     <ul id="generos" class="generos"></ul>
   </div>
-
   <p id="sinopsis" class="sinopsis"></p>
 </section>
 
-<div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
-  <button id="closeBtn" aria-label="Cerrar reproductor">✕ Cerrar</button>
-  <video id="player" playsinline controls></video>
-</div>
+  <!-- Modal Player -->
+  <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
+    <button id="closeBtn" aria-label="Cerrar reproductor">✕ Cerrar</button>
+    <video id="player" playsinline controls></video>
+  </div>
 
 <script>
   const firebaseConfig = {
@@ -338,6 +282,7 @@
   let videoLatino = '';
   let videoCastellano = '';
   let videoURL = '';
+  let plyr = null;
 
   const tituloParam = new URLSearchParams(location.search).get('titulo') || '';
 
@@ -353,110 +298,125 @@
         const p = snap.docs[0].data();
 
         $titulo.textContent = p.titulo || 'Sin título';
-        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
-        $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
-        // Año (mejorado visualmente)
-        $anio.innerHTML = p.anio
-          ? `<div class="meta-item"><i class="icon-fecha"></i>${p.anio}</div>`
-          : '';
-
-        // Puntuación (estilo más limpio)
-        $punt.innerHTML = p.puntuacion
-          ? `<div class="meta-item"><i class="icon-estrella"></i>⭐ ${p.puntuacion}/10</div>`
-          : '';
-
-        // Géneros como tags
-        $generos.innerHTML = '';
-        if (Array.isArray(p.genero) && p.genero.length > 0) {
-          p.genero.forEach(g => {
-            const span = document.createElement('span');
-            span.className = 'genero-tag';
-            span.textContent = g;
-            $generos.appendChild(span);
-          });
+        if (p.anio) {
+          $anio.textContent = p.anio;
+          $anio.setAttribute('datetime', p.anio);
         }
 
-        videoLatino = (p.latino || '').trim();
-        videoCastellano = (p.castellano || '').trim();
+        if (p.puntuacion) {
+          $punt.value = p.puntuacion;
+          $punt.textContent = `${p.puntuacion}/10`;
+        }
 
-        const tieneLatino = videoLatino.length > 5;
-        const tieneCastellano = videoCastellano.length > 5;
+        if (Array.isArray(p.generos)) {
+          $generos.innerHTML = p.generos.map(g => `<li>${g}</li>`).join('');
+        }
 
-        $audioMenu.innerHTML = '';
+        $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
+        $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        if (tieneLatino && tieneCastellano) {
-          $audioBtn.style.display = 'block';
-          $audioBtn.textContent = '🎧 Ver en ▾';
+        videoLatino = p.latino || '';
+        videoCastellano = p.castellano || '';
 
-          const btnLat = document.createElement('button');
-          btnLat.className = 'audio-option';
-          btnLat.dataset.lang = 'latino';
-          btnLat.textContent = '🔊 Latino';
-          $audioMenu.appendChild(btnLat);
-
-          const btnCast = document.createElement('button');
-          btnCast.className = 'audio-option';
-          btnCast.dataset.lang = 'castellano';
-          btnCast.textContent = '🔊 Castellano';
-          $audioMenu.appendChild(btnCast);
-
-          videoURL = videoLatino;
-        } else if (tieneLatino) {
+        if (!videoLatino && !videoCastellano) {
           $audioBtn.style.display = 'none';
-          videoURL = videoLatino;
-        } else if (tieneCastellano) {
-          $audioBtn.style.display = 'none';
-          videoURL = videoCastellano;
-        } else {
-          $audioBtn.style.display = 'none';
-          videoURL = '';
         }
       })
-      .catch(e => {
-        console.error(e);
+      .catch((err) => {
+        console.error(err);
         $titulo.textContent = 'Película no encontrada';
         $audioBtn.style.display = 'none';
       });
   }
 
-  // Menú de audio
+  // Menú idioma
   $audioBtn.addEventListener('click', () => {
     $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
+    $audioMenu.style.flexDirection = 'column';
   });
 
-  // Selección idioma
-  $audioMenu.addEventListener('click', e => {
-    if (e.target.classList.contains('audio-option')) {
+  document.querySelectorAll('.audio-option').forEach(btn => {
+    btn.addEventListener('click', (e) => {
       const lang = e.target.dataset.lang;
-      videoURL = lang === 'latino' ? videoLatino : videoCastellano;
-      $audioBtn.textContent = lang === 'latino' ? '🎧 Latino ▾' : '🎧 Castellano ▾';
+      const url = lang === 'latino' ? videoLatino : videoCastellano;
+      if (url) {
+        videoURL = url;
+        openModal();
+      } else {
+        alert('Este idioma no está disponible.');
+      }
       $audioMenu.style.display = 'none';
-      abrirModal();
+    });
+  });
+
+  // Cerrar menú si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-audio')) {
+      $audioMenu.style.display = 'none';
     }
   });
 
-  // Abrir reproductor
-  function abrirModal() {
+  // Modal Player
+  async function openModal() {
     if (!videoURL) return;
-    $video.src = videoURL;
+
     $modal.classList.add('show');
-    $video.play();
+
+    if (plyr) {
+      plyr.destroy();
+      plyr = null;
+    }
+
+    $video.removeAttribute('src');
+    $video.load();
+    $video.src = videoURL;
+
+    plyr = new Plyr($video, {
+      autoplay: true,
+      controls: ['play', 'progress', 'mute', 'volume', 'fullscreen'],
+    });
+
+    try {
+      await $video.play();
+      if ($modal.requestFullscreen) {
+        await $modal.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Error al reproducir:', e);
+    }
   }
 
-  // Cerrar modal
-  document.getElementById('closeBtn').addEventListener('click', () => {
-    $modal.classList.remove('show');
-    $video.pause();
-    $video.src = '';
-  });
-
-  // Cerrar con Escape
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && $modal.classList.contains('show')) {
-      $modal.classList.remove('show');
+  async function closeModal() {
+    try {
       $video.pause();
-      $video.src = '';
+      $video.removeAttribute('src');
+      $video.load();
+
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+
+      $modal.classList.remove('show');
+
+      setTimeout(() => {
+        if (plyr) {
+          plyr.destroy();
+          plyr = null;
+        }
+      }, 300);
+    } catch (error) {
+      console.error('Error al cerrar modal:', error);
+    }
+  }
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  $video.addEventListener('ended', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (!$modal.classList.contains('show')) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      closeModal();
     }
   });
 </script>
