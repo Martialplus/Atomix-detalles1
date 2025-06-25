@@ -235,10 +235,7 @@
   <section id="hero">
     <div class="menu-audio">
       <button id="audioBtn">🎧 Ver en ▾</button>
-      <div id="audioMenu">
-        <button class="audio-option" data-lang="latino">🔊 Latino</button>
-        <button class="audio-option" data-lang="castellano">🔊 Castellano</button>
-      </div>
+      <div id="audioMenu"></div>
     </div>
   </section>
 
@@ -301,11 +298,47 @@
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen || ''})`;
 
-        videoLatino = p.latino || '';
-        videoCastellano = p.castellano || '';
+        videoLatino = (p.latino || '').trim();
+        videoCastellano = (p.castellano || '').trim();
 
-        if (!videoLatino && !videoCastellano) {
+        const tieneLatino = videoLatino.length > 5;
+        const tieneCastellano = videoCastellano.length > 5;
+
+        $audioMenu.innerHTML = '';
+
+        if (tieneLatino && tieneCastellano) {
+          $audioBtn.style.display = 'block';
+          $audioBtn.textContent = '🎧 Ver en ▾';
+
+          const btnLat = document.createElement('button');
+          btnLat.className = 'audio-option';
+          btnLat.dataset.lang = 'latino';
+          btnLat.textContent = '🔊 Latino';
+          $audioMenu.appendChild(btnLat);
+
+          const btnCast = document.createElement('button');
+          btnCast.className = 'audio-option';
+          btnCast.dataset.lang = 'castellano';
+          btnCast.textContent = '🔊 Castellano';
+          $audioMenu.appendChild(btnCast);
+
+        } else if (tieneLatino) {
+          $audioBtn.textContent = '▶ Ver en Latino';
+          $audioMenu.style.display = 'none';
+          $audioBtn.onclick = () => {
+            videoURL = videoLatino;
+            openModal();
+          };
+        } else if (tieneCastellano) {
+          $audioBtn.textContent = '▶ Ver en Castellano';
+          $audioMenu.style.display = 'none';
+          $audioBtn.onclick = () => {
+            videoURL = videoCastellano;
+            openModal();
+          };
+        } else {
           $audioBtn.style.display = 'none';
+          $audioMenu.style.display = 'none';
         }
       })
       .catch((err) => {
@@ -315,15 +348,19 @@
       });
   }
 
-  // Menú idioma
+  // Menú idioma (cuando hay dos opciones)
   $audioBtn.addEventListener('click', () => {
-    $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
-    $audioMenu.style.flexDirection = 'column';
+    if (document.querySelectorAll('.audio-option').length > 0) {
+      $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
+      $audioMenu.style.flexDirection = 'column';
+    }
   });
 
-  document.querySelectorAll('.audio-option').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const lang = e.target.dataset.lang;
+  // Click en las opciones del menú o fuera para cerrar
+  document.addEventListener('click', (e) => {
+    const option = e.target.closest('.audio-option');
+    if (option) {
+      const lang = option.dataset.lang;
       const url = lang === 'latino' ? videoLatino : videoCastellano;
       if (url) {
         videoURL = url;
@@ -332,12 +369,7 @@
         alert('Este idioma no está disponible.');
       }
       $audioMenu.style.display = 'none';
-    });
-  });
-
-  // Cerrar menú si clic fuera
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.menu-audio')) {
+    } else if (!e.target.closest('.menu-audio')) {
       $audioMenu.style.display = 'none';
     }
   });
