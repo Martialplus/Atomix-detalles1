@@ -281,15 +281,15 @@
     </div>
   </section>
 
-  <section class="info">
-    <h1 id="titulo" class="titulo">Cargando…</h1>
-    <div class="meta">
-      <span id="anio" class="anio"></span>
-      <span id="puntuacion" class="rating"></span>
-      <div id="generos" class="generos"></div>
-    </div>
-    <p id="sinopsis" class="sinopsis"></p>
-  </section>
+<section class="info">
+  <h1 id="titulo" class="titulo">Cargando…</h1>
+  <div class="meta">
+    <time id="anio" class="anio" datetime=""></time>
+    <meter id="puntuacion" class="rating" min="0" max="10" value="0">0/10</meter>
+    <ul id="generos" class="generos"></ul>
+  </div>
+  <p id="sinopsis" class="sinopsis"></p>
+</section>
 
   <!-- Modal Player -->
   <div id="modalPlayer" role="dialog" aria-modal="true" tabindex="-1">
@@ -337,34 +337,37 @@
 
         $titulo.textContent = p.titulo || 'Sin título';
 
-        $anio.innerHTML = p.anio
-          ? `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2
-            2 0 0 0-2 2v14a2 2 0 0 0 2 
-            2h14a2 2 0 0 0 2-2V6a2 2 0 
-            0 0-2-2zm0 16H5V9h14zm0-11H5V6h14z"/></svg>${p.anio}`
-          : '';
+        // Año con etiqueta <time>
+        if (p.anio) {
+          $anio.textContent = p.anio;
+          $anio.setAttribute('datetime', `${p.anio}`);
+        } else {
+          $anio.textContent = '';
+          $anio.removeAttribute('datetime');
+        }
 
-        $punt.innerHTML = p.puntuacion
-          ? `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 17.27 18.18 
-            21l-1.64-7.03L22 9.24l-7.19-.61L12 
-            2 9.19 8.63 2 9.24l5.46 
-            4.73L5.82 21z"/></svg>⭐ ${p.puntuacion}/10`
-          : '';
+        // Puntuación con <meter>
+        if (p.puntuacion) {
+          const puntuacionNum = parseFloat(p.puntuacion);
+          $punt.value = puntuacionNum;
+          $punt.textContent = `⭐ ${p.puntuacion}/10`;
+        } else {
+          $punt.value = 0;
+          $punt.textContent = '';
+        }
 
         $sin.textContent = p.sinopsis || 'Sinopsis no disponible.';
         $hero.style.backgroundImage = `url(${p.imagen_detalle || p.imagen || ''})`;
 
-        // Mostrar géneros
+        // Géneros en <ul><li>
+        $generos.innerHTML = '';
         if (Array.isArray(p.genero) && p.genero.length > 0) {
-          $generos.innerHTML = '';
           p.genero.forEach(g => {
-            const span = document.createElement('span');
-            span.className = 'genero';
-            span.textContent = g;
-            $generos.appendChild(span);
+            const li = document.createElement('li');
+            li.className = 'genero';
+            li.textContent = g;
+            $generos.appendChild(li);
           });
-        } else {
-          $generos.innerHTML = '';
         }
 
         videoLatino = (p.latino || '').trim();
@@ -391,7 +394,6 @@
           btnCast.textContent = '🔊 Castellano';
           $audioMenu.appendChild(btnCast);
 
-          // Por defecto reproducir latino
           videoURL = videoLatino;
         } else if (tieneLatino) {
           $audioBtn.style.display = 'none';
@@ -413,11 +415,7 @@
 
   // Toggle menú audio
   $audioBtn.addEventListener('click', () => {
-    if ($audioMenu.style.display === 'flex') {
-      $audioMenu.style.display = 'none';
-    } else {
-      $audioMenu.style.display = 'flex';
-    }
+    $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
   });
 
   // Seleccionar idioma audio
@@ -436,7 +434,6 @@
     }
   });
 
-  // Abrir modal reproductor
   function abrirModal() {
     if (!videoURL) return;
     $video.src = videoURL;
@@ -444,14 +441,12 @@
     $video.play();
   }
 
-  // Cerrar modal
   document.getElementById('closeBtn').addEventListener('click', () => {
     $modal.classList.remove('show');
     $video.pause();
     $video.src = '';
   });
 
-  // Cerrar modal con Escape
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && $modal.classList.contains('show')) {
       $modal.classList.remove('show');
