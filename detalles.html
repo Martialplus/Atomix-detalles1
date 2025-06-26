@@ -205,6 +205,27 @@
       background: #0088cc;
     }
 
+#idiomaError {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 60, 60, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1.4rem;
+  display: none;
+  z-index: 10001;
+  animation: fadeInOut 3s forwards;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+    
     @media (max-width: 900px) {
       .titulo {
         font-size: 2.5rem;
@@ -259,6 +280,8 @@
     <video id="player" playsinline controls></video>
   </div>
 
+<div id="idiomaError">Este idioma no está disponible.</div>
+  
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCmMqUkiT_8zTdJYIfhs2VneW9p_33vow4",
@@ -319,6 +342,19 @@
       });
   }
 
+  // Mostrar mensaje flotante si idioma no disponible
+  function showIdiomaError() {
+    const errorBox = document.getElementById('idiomaError');
+    errorBox.style.display = 'block';
+    errorBox.style.animation = 'none';
+    errorBox.offsetHeight; // Forzar reflow
+    errorBox.style.animation = null;
+
+    setTimeout(() => {
+      errorBox.style.display = 'none';
+    }, 3000);
+  }
+
   // Menú idioma
   $audioBtn.addEventListener('click', () => {
     $audioMenu.style.display = $audioMenu.style.display === 'flex' ? 'none' : 'flex';
@@ -333,7 +369,7 @@
         videoURL = url;
         openModal();
       } else {
-        alert('Este idioma no está disponible.');
+        showIdiomaError();
       }
       $audioMenu.style.display = 'none';
     });
